@@ -155,7 +155,7 @@
                     scale="0.01 0.01 0.01">
                 </a-gltf-model>
 
-                <a-plane position="0 -0.001 0" rotation="-90 0 0" width="5" height="5" 
+                <a-plane position="0 0 0" rotation="-90 0 0" width="5" height="5" 
                          material="color: #000000; opacity: 0.45; transparent: true; shadowOnly: true" 
                          shadow="receive: true">
                 </a-plane>
@@ -191,7 +191,6 @@
           const container = document.querySelector('#gestureContainer');
           
           // 🎯【全場焦點：日照控制參數】
-          // 可以在這裡自由修改月份、日期、小時（24小時制，支援小數點如 14.5 代表下午兩點半）
           const currentMonth = 6;    // 6 月
           const currentDay = 22;     // 22 日 (夏至附近)
           const currentHour = 14.0;  // 下午 2:00
@@ -200,45 +199,31 @@
           const LATITUDE = 25.0;     // 北緯 25.0
           const LONGITUDE = 121.3;   // 東經 121.3
 
-          // 🎯 依據天文幾何計算太陽位置向量，並精準對齊你的模型方位系統
           function updateSunAnalemma(month, day, hour) {
               const degToRad = Math.PI / 180;
-              
-              // 1. 計算該日期是一年中的第幾天 (N)
               const monthDays = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
               const N = monthDays[month - 1] + day;
-              
-              // 2. 計算太陽赤緯角 (Declination Angle)
               const declination = 23.45 * Math.sin(360 / 365 * (284 + N) * degToRad);
-              
-              // 3. 計算時角 (Hour Angle) - 正午12點為0度，每小時15度
               const hourAngle = (hour - 12) * 15;
               
-              // 轉換為弧度值
               const latRad = LATITUDE * degToRad;
               const decRad = declination * degToRad;
               const hrRad = hourAngle * degToRad;
               
-              // 4. 計算太陽仰角 (Solar Altitude / Elevation)
               const sinAltitude = Math.sin(latRad) * Math.sin(decRad) + Math.cos(latRad) * Math.cos(decRad) * Math.cos(hrRad);
               const altitude = Math.asin(sinAltitude);
               
-              // 5. 計算太陽方位角 (Solar Azimuth)
               const cosAzimuth = (Math.sin(decRad) * Math.cos(latRad) - Math.cos(decRad) * Math.sin(latRad) * Math.cos(hrRad)) / Math.cos(altitude);
               let azimuth = Math.acos(Math.max(-1, Math.min(1, cosAzimuth)));
               if (hourAngle > 0) {
                   azimuth = 2 * Math.PI - azimuth;
               }
 
-              // 6. 轉化為直角座標系向量，並精準契合你的指定模型方位：
-              // N(-Z), E(+X), S(+Z), W(-X)
-              const distance = 4.0; // 太陽光源發射距離
-              
+              const distance = 4.0; 
               const x = distance * Math.cos(altitude) * Math.sin(azimuth);
               const y = distance * Math.sin(altitude);
-              const z = -distance * Math.cos(altitude) * Math.cos(azimuth); // 負號確保正北指向 -Z
+              const z = -distance * Math.cos(altitude) * Math.cos(azimuth); 
 
-              // 如果太陽已經下山（仰角小於0），自動關閉陰影投射，避免穿透地底漏光
               if (y < 0) {
                   sunPosition.setAttribute('light', 'castShadow', false);
                   sunPosition.setAttribute('position', {x: 0, y: -1, z: 0});
@@ -250,7 +235,6 @@
               console.log(`Sun Vector Calculated -> X:${x.toFixed(2)}, Y:${y.toFixed(2)}, Z:${z.toFixed(2)} (Elev: ${(altitude/degToRad).toFixed(1)}°, Azi: ${(azimuth/degToRad).toFixed(1)}°)`);
           }
 
-          // 啟動日照幾何換算
           updateSunAnalemma(currentMonth, currentDay, currentHour);
 
           // UI 狀態控制
