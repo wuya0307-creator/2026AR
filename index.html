@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
 
     <style>
-      /* Apple 極簡 UI 介面完全鎖定，不作變更 */
+      /* Apple 極簡遮罩 UI */
       #example-scanning-overlay {
         position: absolute;
         left: 0; right: 0; top: 0; bottom: 0;
@@ -23,13 +23,11 @@
         opacity: 1;
         transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1); 
       }
-      
       #example-scanning-overlay.hidden {
         opacity: 0;
         pointer-events: none;
         display: none !important; 
       }
-
       .brand-title {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         color: #1d1d1f; 
@@ -39,7 +37,6 @@
         margin-bottom: 30px;
         text-transform: uppercase;
       }
-
       .scanning-target-box {
         width: 280px;  
         height: 280px; 
@@ -47,9 +44,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 
-          inset 0 0 0 2px rgba(255, 255, 255, 0.5),
-          0 4px 25px rgba(0, 0, 0, 0.05);
+        box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5), 0 4px 25px rgba(0, 0, 0, 0.05);
         border-radius: 20px;
         background-image: url('./LOGO.png'); 
         background-size: 80% 80%; 
@@ -58,12 +53,8 @@
         background-color: rgba(255, 255, 255, 0.25); 
         background-blend-mode: overlay;
       }
-
       .scanning-target-box-corners {
-        position: absolute;
-        width: 100%; height: 100%;
-        top: 0; left: 0;
-        pointer-events: none;
+        position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none;
       }
       .scanning-target-box-corners::before,
       .scanning-target-box-corners::after {
@@ -71,37 +62,75 @@
       }
       .scanning-target-box-corners::before { top: 0; left: 0; border-width: 4px 0 0 4px; border-top-left-radius: 16px; }
       .scanning-target-box-corners::after { top: 0; right: 0; border-width: 4px 4px 0 0; border-top-right-radius: 16px; }
-      
-      .corner-bl {
-        position: absolute; bottom: 0; left: 0; width: 25px; height: 25px; 
-        border-style: solid; border-color: #ffffff; border-width: 0 0 4px 4px; border-bottom-left-radius: 16px;
-      }
-      .corner-br {
-        position: absolute; bottom: 0; right: 0; width: 25px; height: 25px; 
-        border-style: solid; border-color: #ffffff; border-width: 0 4px 4px 0; border-bottom-right-radius: 16px;
-      }
+      .corner-bl { position: absolute; bottom: 0; left: 0; width: 25px; height: 25px; border-style: solid; border-color: #ffffff; border-width: 0 0 4px 4px; border-bottom-left-radius: 16px; }
+      .corner-br { position: absolute; bottom: 0; right: 0; width: 25px; height: 25px; border-style: solid; border-color: #ffffff; border-width: 0 4px 4px 0; border-bottom-right-radius: 16px; }
+      .scanning-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #515154; font-size: 1.1em; margin-top: 35px; font-weight: 500; letter-spacing: 0.5px; }
+      .scanning-text.emergency { color: #ff3b30; font-weight: 700; letter-spacing: 1px; animation: apple-pulse 2s infinite ease-in-out; }
+      @keyframes apple-pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
-      .scanning-text {
+      /* 🎯 新增：左側高級半透明磨砂玻璃控制欄位 */
+      #sun-control-panel {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: 240px;
+        padding: 16px 20px;
+        background: rgba(255, 255, 255, 0.25); /* 半透明白 */
+        backdrop-filter: blur(20px); /* 關鍵：磨砂玻璃核心技術 */
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 16px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+        z-index: 50; /* 確保浮在相機視訊上方，但低於載入遮罩 */
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        color: #515154; 
-        font-size: 1.1em;
-        margin-top: 35px;
-        font-weight: 500;
-        letter-spacing: 0.5px;
-        transition: all 0.3s ease;
+        color: #1d1d1f;
+        pointer-events: auto; /* 允許手指觸控滑桿 */
+        display: none; /* 初始隱藏，找到圖紙後才彈出 */
       }
-      
-      .scanning-text.emergency {
-        color: #ff3b30; 
+      .panel-header {
+        font-size: 0.85em;
         font-weight: 700;
         letter-spacing: 1px;
-        animation: apple-pulse 2s infinite ease-in-out;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        color: #000000;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        padding-bottom: 6px;
       }
-      
-      @keyframes apple-pulse {
-        0% { opacity: 0.6; }
-        50% { opacity: 1; }
-        100% { opacity: 0.6; }
+      .control-group {
+        margin-bottom: 10px;
+      }
+      .control-group:last-child {
+        margin-bottom: 0;
+      }
+      .control-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8em;
+        font-weight: 500;
+        color: #3a3a3c;
+        margin-bottom: 4px;
+      }
+      .control-slider {
+        width: 100%;
+        -webkit-appearance: none;
+        appearance: none;
+        height: 4px;
+        border-radius: 2px;
+        background: rgba(0, 0, 0, 0.15);
+        outline: none;
+        margin: 8px 0;
+      }
+      /* 客製化 iOS 極簡滑桿圓點 */
+      .control-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #ffffff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        cursor: pointer;
       }
     </style>
   </head>
@@ -115,6 +144,25 @@
         <div class="corner-br"></div>
       </div>
       <div class="scanning-text" id="statusText">Loading Architectural Massing...</div>
+    </div>
+
+    <div id="sun-control-panel">
+      <div class="panel-header">Solar Analemma Control</div>
+      
+      <div class="control-group">
+        <div class="control-label"><span>Month</span><span id="val-month">6</span></div>
+        <input type="range" id="slider-month" class="control-slider" min="1" max="12" value="6">
+      </div>
+      
+      <div class="control-group">
+        <div class="control-label"><span>Day</span><span id="val-day">22</span></div>
+        <input type="range" id="slider-day" class="control-slider" min="1" max="31" value="22">
+      </div>
+      
+      <div class="control-group">
+        <div class="control-label"><span>Hour</span><span id="val-hour">14:00</span></div>
+        <input type="range" id="slider-hour" class="control-slider" min="5" max="19" step="0.5" value="14">
+      </div>
     </div>
 
     <a-scene 
@@ -183,23 +231,41 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-          const facadeUnits = document.querySelector('#facadeUnits');
           const sunPosition = document.querySelector('#sunPosition');
           const sceneEl = document.querySelector('a-scene');
           const overlay = document.querySelector('#example-scanning-overlay');
           const statusText = document.querySelector('#statusText');
           const container = document.querySelector('#gestureContainer');
           
-          // 🎯【日照控制參數】
-          const currentMonth = 6;    
-          const currentDay = 22;     
-          const currentHour = 14.0;  
+          // 取得磨砂控制面板與滑桿 DOM 元素
+          const controlPanel = document.querySelector('#sun-control-panel');
+          const sliderMonth = document.querySelector('#slider-month');
+          const sliderDay = document.querySelector('#slider-day');
+          const sliderHour = document.querySelector('#slider-hour');
+          const valMonth = document.querySelector('#val-month');
+          const valDay = document.querySelector('#val-day');
+          const valHour = document.querySelector('#val-hour');
 
-          // 地理資訊
-          const LATITUDE = 25.0;     
-          const LONGITUDE = 121.3;   
+          // 🎯 依據你的要求，基地地理資訊嚴格鎖定：
+          const LATITUDE = 25.0;     // 北緯 25.0
+          const LONGITUDE = 121.3;   // 東經 121.3
 
-          function updateSunAnalemma(month, day, hour) {
+          // 🎯 日照計算與即時更新引擎
+          function updateSunAnalemma() {
+              const month = parseInt(sliderMonth.value);
+              const day = parseInt(sliderDay.value);
+              const hour = parseFloat(sliderHour.value);
+
+              // 更改文字 UI 顯示
+              valMonth.innerText = month + " M";
+              valDay.innerText = day + " D";
+              
+              // 格式化小時（例如 14.5 顯示成 14:30）
+              const hInt = Math.floor(hour);
+              const hMin = (hour % 1 === 0.5) ? "30" : "00";
+              valHour.innerText = `${hInt}:${hMin}`;
+
+              // 開始天文幾何計算
               const degToRad = Math.PI / 180;
               const monthDays = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
               const N = monthDays[month - 1] + day;
@@ -224,6 +290,7 @@
               const y = distance * Math.sin(altitude);
               const z = -distance * Math.cos(altitude) * Math.cos(azimuth); 
 
+              // 動態將計算出的三維向量灌入 A-Frame 定向光源
               if (y < 0) {
                   sunPosition.setAttribute('light', 'castShadow', false);
                   sunPosition.setAttribute('position', {x: 0, y: -1, z: 0});
@@ -233,16 +300,24 @@
               }
           }
 
-          updateSunAnalemma(currentMonth, currentDay, currentHour);
+          // 監聽滑桿，只要手指一滑動，立刻即時觸發重算陰影
+          sliderMonth.addEventListener('input', updateSunAnalemma);
+          sliderDay.addEventListener('input', updateSunAnalemma);
+          sliderHour.addEventListener('input', updateSunAnalemma);
 
-          // UI 狀態控制
+          // 預先啟動一次初始值（6月22日 14:00）
+          updateSunAnalemma();
+
+          // UI 狀態控制：加載完成與圖紙尋找
           sceneEl.addEventListener("assets-loaded", () => {
               if(statusText) statusText.innerText = "Align camera with the target design...";
           });
           sceneEl.addEventListener("targetFound", () => {
               if(overlay) overlay.classList.add('hidden');
+              if(controlPanel) controlPanel.style.display = 'block'; // 🎯 核心：找到圖紙後才優雅浮現控制面板
           });
           sceneEl.addEventListener("targetLost", () => {
+              if(controlPanel) controlPanel.style.display = 'none';  // 核心：弄丟圖紙時先隱藏面板，避免畫面凌亂
               if(overlay) {
                   statusText.classList.remove('emergency'); 
                   overlay.classList.remove('hidden');
