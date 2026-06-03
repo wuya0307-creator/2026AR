@@ -1,0 +1,301 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <title>2050 SYNAPSE Augmented Reality</title>
+    
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
+
+    <style>
+      /* Apple 極簡 UI 介面完全鎖定，不作變更 */
+      #example-scanning-overlay {
+        position: absolute;
+        left: 0; right: 0; top: 0; bottom: 0;
+        background: rgba(230, 230, 232, 0.6); 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        pointer-events: none;
+        opacity: 1;
+        transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1); 
+      }
+      
+      #example-scanning-overlay.hidden {
+        opacity: 0;
+        pointer-events: none;
+        display: none !important; 
+      }
+
+      .brand-title {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: #1d1d1f; 
+        font-size: 1.4em;
+        font-weight: 600;
+        letter-spacing: 1.5px;
+        margin-bottom: 30px;
+        text-transform: uppercase;
+      }
+
+      .scanning-target-box {
+        width: 280px;  
+        height: 280px; 
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 
+          inset 0 0 0 2px rgba(255, 255, 255, 0.5),
+          0 4px 25px rgba(0, 0, 0, 0.05);
+        border-radius: 20px;
+        background-image: url('./LOGO.png'); 
+        background-size: 80% 80%; 
+        background-position: center;
+        background-repeat: no-repeat;
+        background-color: rgba(255, 255, 255, 0.25); 
+        background-blend-mode: overlay;
+      }
+
+      .scanning-target-box-corners {
+        position: absolute;
+        width: 100%; height: 100%;
+        top: 0; left: 0;
+        pointer-events: none;
+      }
+      .scanning-target-box-corners::before,
+      .scanning-target-box-corners::after {
+        content: ""; position: absolute; width: 25px; height: 25px; border-style: solid; border-color: #ffffff;
+      }
+      .scanning-target-box-corners::before { top: 0; left: 0; border-width: 4px 0 0 4px; border-top-left-radius: 16px; }
+      .scanning-target-box-corners::after { top: 0; right: 0; border-width: 4px 4px 0 0; border-top-right-radius: 16px; }
+      
+      .corner-bl {
+        position: absolute; bottom: 0; left: 0; width: 25px; height: 25px; 
+        border-style: solid; border-color: #ffffff; border-width: 0 0 4px 4px; border-bottom-left-radius: 16px;
+      }
+      .corner-br {
+        position: absolute; bottom: 0; right: 0; width: 25px; height: 25px; 
+        border-style: solid; border-color: #ffffff; border-width: 0 4px 4px 0; border-bottom-right-radius: 16px;
+      }
+
+      .scanning-text {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        color: #515154; 
+        font-size: 1.1em;
+        margin-top: 35px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+      }
+      
+      .scanning-text.emergency {
+        color: #ff3b30; 
+        font-weight: 700;
+        letter-spacing: 1px;
+        animation: apple-pulse 2s infinite ease-in-out;
+      }
+      
+      @keyframes apple-pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="example-scanning-overlay">
+      <div class="brand-title">2050 SYNAPSE Augmented Reality</div>
+      <div class="scanning-target-box">
+        <div class="scanning-target-box-corners"></div>
+        <div class="corner-bl"></div>
+        <div class="corner-br"></div>
+      </div>
+      <div class="scanning-text" id="statusText">Loading Architectural Massing...</div>
+    </div>
+
+    <a-scene 
+      mindar-image="imageTargetSrc: ./targets.mind; uiError:no; uiLoading:no; uiScanning:no; filterMinCF:0.0005; filterBeta: 0.1" 
+      color-space="sRGB" 
+      renderer="colorManagement: true; sortObjects: true; antialias: true; shadowMapEnabled: true; shadowMapType: THREE.PCFShadowMap;" 
+      vr-mode-ui="enabled: false" 
+      device-orientation-permission-ui="enabled: false">
+      
+      <a-assets timeout="30000">
+        <a-asset-item id="buildingModel" src="./MODEL.glb"></a-asset-item>
+        <a-asset-item id="buildingModel2" src="./MODEL-2.glb"></a-asset-item>
+      </a-assets>
+
+      <a-camera position="0 0.3 1" fov="35" rotation="-15 0 0" look-controls="enabled: false">
+      </a-camera>
+
+      <a-entity mindar-image-target="targetIndex: 0">
+        
+        <a-entity id="gestureContainer" rotation="0 0 0" scale="1 1 1">
+            <a-entity rotation="90 0 0">
+
+                <a-gltf-model id="facadeUnits"
+                    src="#buildingModel"
+                    animation-mixer
+                    shadow="cast: true; receive: true"
+                    position="0 0 0" 
+                    rotation="0 0 0" 
+                    scale="0.01 0.01 0.01">
+                </a-gltf-model>
+
+                <a-gltf-model id="facadeUnits2"
+                    src="#buildingModel2"
+                    animation-mixer
+                    shadow="cast: true; receive: true"
+                    position="0 0 0" 
+                    rotation="0 0 0" 
+                    scale="0.01 0.01 0.01">
+                </a-gltf-model>
+
+                <a-plane position="0 -0.001 0" rotation="-90 0 0" width="5" height="5" 
+                         material="color: #000000; opacity: 0.45; transparent: true; shadowOnly: true" 
+                         shadow="receive: true">
+                </a-plane>
+
+            </a-entity>
+        </a-entity>
+
+        <a-light id="sunPosition" type="directional" 
+                 position="1 3 1" 
+                 intensity="1.3" 
+                 castShadow="true"
+                 shadowBias="-0.0003"
+                 shadowMapWidth="4096"
+                 shadowMapHeight="4096"
+                 shadowCameraLeft="-0.3" 
+                 shadowCameraRight="0.3" 
+                 shadowCameraTop="0.3" 
+                 shadowCameraBottom="-0.3">
+        </a-light>
+        
+        <a-light type="ambient" intensity="0.4"></a-light>
+
+      </a-entity>
+    </a-scene>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+          const facadeUnits = document.querySelector('#facadeUnits');
+          const sunPosition = document.querySelector('#sunPosition');
+          const sceneEl = document.querySelector('a-scene');
+          const overlay = document.querySelector('#example-scanning-overlay');
+          const statusText = document.querySelector('#statusText');
+          const container = document.querySelector('#gestureContainer');
+          
+          // 🎯【全場焦點：日照控制參數】
+          // 可以在這裡自由修改月份、日期、小時（24小時制，支援小數點如 14.5 代表下午兩點半）
+          const currentMonth = 6;    // 6 月
+          const currentDay = 22;     // 22 日 (夏至附近)
+          const currentHour = 14.0;  // 下午 2:00
+
+          // 地理資訊
+          const LATITUDE = 25.0;     // 北緯 25.0
+          const LONGITUDE = 121.3;   // 東經 121.3
+
+          // 🎯 依據天文幾何計算太陽位置向量，並精準對齊你的模型方位系統
+          function updateSunAnalemma(month, day, hour) {
+              const degToRad = Math.PI / 180;
+              
+              // 1. 計算該日期是一年中的第幾天 (N)
+              const monthDays = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+              const N = monthDays[month - 1] + day;
+              
+              // 2. 計算太陽赤緯角 (Declination Angle)
+              const declination = 23.45 * Math.sin(360 / 365 * (284 + N) * degToRad);
+              
+              // 3. 計算時角 (Hour Angle) - 正午12點為0度，每小時15度
+              const hourAngle = (hour - 12) * 15;
+              
+              // 轉換為弧度值
+              const latRad = LATITUDE * degToRad;
+              const decRad = declination * degToRad;
+              const hrRad = hourAngle * degToRad;
+              
+              // 4. 計算太陽仰角 (Solar Altitude / Elevation)
+              const sinAltitude = Math.sin(latRad) * Math.sin(decRad) + Math.cos(latRad) * Math.cos(decRad) * Math.cos(hrRad);
+              const altitude = Math.asin(sinAltitude);
+              
+              // 5. 計算太陽方位角 (Solar Azimuth)
+              const cosAzimuth = (Math.sin(decRad) * Math.cos(latRad) - Math.cos(decRad) * Math.sin(latRad) * Math.cos(hrRad)) / Math.cos(altitude);
+              let azimuth = Math.acos(Math.max(-1, Math.min(1, cosAzimuth)));
+              if (hourAngle > 0) {
+                  azimuth = 2 * Math.PI - azimuth;
+              }
+
+              // 6. 轉化為直角座標系向量，並精準契合你的指定模型方位：
+              // N(-Z), E(+X), S(+Z), W(-X)
+              const distance = 4.0; // 太陽光源發射距離
+              
+              const x = distance * Math.cos(altitude) * Math.sin(azimuth);
+              const y = distance * Math.sin(altitude);
+              const z = -distance * Math.cos(altitude) * Math.cos(azimuth); // 負號確保正北指向 -Z
+
+              // 如果太陽已經下山（仰角小於0），自動關閉陰影投射，避免穿透地底漏光
+              if (y < 0) {
+                  sunPosition.setAttribute('light', 'castShadow', false);
+                  sunPosition.setAttribute('position', {x: 0, y: -1, z: 0});
+              } else {
+                  sunPosition.setAttribute('light', 'castShadow', true);
+                  sunPosition.setAttribute('position', { x: x, y: y, z: z });
+              }
+              
+              console.log(`Sun Vector Calculated -> X:${x.toFixed(2)}, Y:${y.toFixed(2)}, Z:${z.toFixed(2)} (Elev: ${(altitude/degToRad).toFixed(1)}°, Azi: ${(azimuth/degToRad).toFixed(1)}°)`);
+          }
+
+          // 啟動日照幾何換算
+          updateSunAnalemma(currentMonth, currentDay, currentHour);
+
+          // UI 狀態控制
+          sceneEl.addEventListener("assets-loaded", () => {
+              if(statusText) statusText.innerText = "Align camera with the target design...";
+          });
+          sceneEl.addEventListener("targetFound", () => {
+              if(overlay) overlay.classList.add('hidden');
+          });
+          sceneEl.addEventListener("targetLost", () => {
+              if(overlay) {
+                  statusText.classList.remove('emergency'); 
+                  overlay.classList.remove('hidden');
+                  statusText.innerText = "EMERGENCY ENGINE";
+                  statusText.classList.add('emergency');
+              }
+          });
+
+          // 雙指純縮放
+          let initialHandDistance = 0;
+          let initialContainerScale = { x: 1, y: 1, z: 1 };
+          window.addEventListener('touchstart', (e) => {
+              if (e.touches.length === 2) {
+                  initialHandDistance = Math.hypot(
+                      e.touches[0].pageX - e.touches[1].pageX,
+                      e.touches[0].pageY - e.touches[1].pageY
+                  );
+                  initialContainerScale = { ...container.getAttribute('scale') };
+              }
+          });
+          window.addEventListener('touchmove', (e) => {
+              if (e.touches.length === 2) {
+                  const currentDistance = Math.hypot(
+                      e.touches[0].pageX - e.touches[1].pageX,
+                      e.touches[0].pageY - e.touches[1].pageY
+                  );
+                  const factor = currentDistance / initialHandDistance;
+                  container.setAttribute('scale', {
+                      x: initialContainerScale.x * factor,
+                      y: initialContainerScale.y * factor,
+                      z: initialContainerScale.z * factor
+                  });
+              }
+          });
+      });
+    </script>
+  </body>
+</html>
