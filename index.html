@@ -37,31 +37,27 @@
       .scanning-text.emergency { color: #ff3b30; font-weight: 700; letter-spacing: 1px; animation: apple-pulse 2s infinite ease-in-out; }
       @keyframes apple-pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
-      /* 右上角 UI 按鈕群組容器 */
+      /* 右上角 UI 按鈕群組 */
       #right-action-group {
         position: absolute; top: 20px; right: 20px; width: 50px; display: none; flex-direction: column; align-items: center; gap: 12px; z-index: 60;
       }
-
-      /* Apple 磨砂質感按鈕組 */
       #sun-toggle-btn {
-        width: 50px; height: 50px;
-        background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        width: 50px; height: 50px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto;
         transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); -webkit-tap-highlight-color: transparent;
       }
       #sun-toggle-btn:active { transform: scale(0.92); }
-      #sun-toggle-btn svg { width: 26px; height: 26px; fill: #1d1d1f; }
+      #sun-toggle-btn svg { width: 24px; height: 24px; fill: #1d1d1f; }
 
       .circle-action-btn {
-        width: 50px; height: 50px;
-        background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        width: 50px; height: 50px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto;
-        font-size: 1.3em; text-decoration: none; color: #1d1d1f;
         transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1); -webkit-tap-highlight-color: transparent;
       }
       .circle-action-btn:active { transform: scale(0.92); background: rgba(255, 255, 255, 0.45); }
+      .circle-action-btn svg { width: 24px; height: 24px; stroke: #ffffff; stroke-width: 1.8px; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 
       /* 左側半透明磨砂玻璃控制欄位 */
       #sun-control-panel {
@@ -79,10 +75,55 @@
       .control-label { display: flex; justify-content: space-between; font-size: 0.8em; font-weight: 500; color: #3a3a3c; margin-bottom: 4px; }
       .control-slider { width: 100%; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: rgba(0, 0, 0, 0.15); outline: none; margin: 8px 0; }
       .control-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer; }
+
+      /* 🎯 新增：高級磨砂玻璃相簿燈箱 (Lightbox) 樣式 */
+      #gallery-lightbox {
+        position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+        background: rgba(30, 30, 32, 0.5); /* 沉浸式暗色背景 */
+        backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); /* 高級背景模糊 */
+        z-index: 200; display: none; opacity: 0;
+        align-items: center; justify-content: center;
+        transition: opacity 0.3s ease; pointer-events: auto;
+      }
+      .lightbox-container {
+        position: relative; width: 85%; max-width: 500px;
+        display: flex; flex-direction: column; align-items: center;
+      }
+      /* 滑動圖片軌道容器 */
+      .slider-wrapper {
+        width: 100%; overflow: hidden; border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3); background: rgba(0,0,0,0.1);
+      }
+      .slider-track {
+        display: flex; width: 200%; /* 2張圖 = 200% */
+        transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      }
+      .slider-item {
+        width: 50%; display: flex; align-items: center; justify-content: center;
+      }
+      .slider-item img {
+        width: 100%; height: auto; display: block; object-fit: contain;
+      }
+      /* 分頁點指示器 (Dots) */
+      .slider-dots {
+        display: flex; gap: 8px; margin-top: 16px;
+      }
+      .dot {
+        width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.3);
+        transition: all 0.2s ease;
+      }
+      .dot.active {
+        width: 20px; border-radius: 4px; background: #ffffff; /* iOS 膠囊狀指示燈 */
+      }
+      /* 關閉提示文字 */
+      .close-tip {
+        margin-top: 14px; font-family: -apple-system, sans-serif;
+        color: rgba(255,255,255,0.5); font-size: 0.75em; letter-spacing: 1px;
+      }
     </style>
 
     <script>
-      // 🎯 降壓重大升級：改用超輕量材質外框組件。不遍歷網格，直接提取邊界，記憶體消耗大減 90%，絕對不閃退！
+      // 輕量化純外框邊緣線組件
       AFRAME.registerComponent('architectural-outline', {
         init: function () {
           this.el.addEventListener('model-loaded', () => {
@@ -90,12 +131,8 @@
             if (!mesh) return;
             mesh.traverse((node) => {
               if (node.isMesh && node.geometry) {
-                // 使用簡化的高速邊緣幾何晶片，不進行深層次運算
-                const edges = new THREE.EdgesGeometry(node.geometry, 82); // 提高到 82 度，僅留最外廓純淨邊緣
-                const lineMaterial = new THREE.LineBasicMaterial({ 
-                  color: 0x111111,
-                  linewidth: 1
-                });
+                const edges = new THREE.EdgesGeometry(node.geometry, 82); 
+                const lineMaterial = new THREE.LineBasicMaterial({ color: 0x111111, linewidth: 1 });
                 const lineSegments = new THREE.LineSegments(edges, lineMaterial);
                 node.add(lineSegments);
               }
@@ -123,8 +160,12 @@
           <path d="M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5S14.76,7,12,7L12,7z M2,13h2c0.55,0,1-0.45,1-1s-0.45-1-1-1H2 c-0.55,0-1,0.45-1,1S1.45,13,2,13L2,13z M20,13h2c0.55,0,1-0.45,1-1s-0.45-1-1-1h-2c-0.55,0-1,0.45-1,1S19.45,13,20,13L20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2L11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2 c0-0.55-0.45-1-1-1S11,19.45,11,20L11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0s-0.39,1.03,0,1.41l1.06,1.06 c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95c-0.39-0.39-1.03-0.39-1.41,0s-0.39,1.03,0,1.41l1.06,1.06 c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L18.36,16.95z M7.05,18.36l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0l1.06-1.06c0.39-0.39,0.39-1.03,0-1.41S7.44,17.96,7.05,18.36z M16.95,5.99l1.06-1.06c0.39-0.39,0.39-1.03,0-1.41 s-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41S16.56,6.38,16.95,5.99z"/>
         </svg>
       </div>
-      <a href="https://twist-waltz-02301407.figma.site/" target="_blank" class="circle-action-btn" title="作品集">📁</a>
-      <div id="gallery-btn" class="circle-action-btn" title="照片集">📸</div>
+      <a href="https://twist-waltz-02301407.figma.site/" target="_blank" class="circle-action-btn" title="作品集">
+        <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+      </a>
+      <div id="gallery-btn" class="circle-action-btn" title="照片集">
+        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+      </div>
     </div>
 
     <div id="sun-control-panel">
@@ -143,6 +184,26 @@
       </div>
     </div>
 
+    <div id="gallery-lightbox">
+      <div class="lightbox-container">
+        <div class="slider-wrapper">
+          <div class="slider-track" id="slider-track">
+            <div class="slider-item">
+              <img src="./OUTSIDE OFFICE RENDER.png" alt="Outside Render">
+            </div>
+            <div class="slider-item">
+              <img src="./INSIDE OFFICEA RENDER.png" alt="Inside Render">
+            </div>
+          </div>
+        </div>
+        <div class="slider-dots">
+          <div class="dot active"></div>
+          <div class="dot"></div>
+        </div>
+        <div class="close-tip">TAP OUTSIDE TO CLOSE</div>
+      </div>
+    </div>
+
     <a-scene 
       mindar-image="imageTargetSrc: ./targets.mind; uiError:no; uiLoading:no; uiScanning:no; filterMinCF:0.001; filterBeta: 0.15" 
       color-space="sRGB" 
@@ -155,19 +216,16 @@
         <a-asset-item id="buildingModel5" src="./MODEL-5.glb"></a-asset-item>
       </a-assets>
 
-      <a-camera position="0 0.3 1" fov="35" rotation="-15 0 0" look-controls="enabled: false">
-      </a-camera>
+      <a-camera position="0 0.3 1" fov="35" rotation="-15 0 0" look-controls="enabled: false"></a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0">
-        <a-entity id="gestureContainer" rotation="0 0 0" scale="1 1 1">
+        <a-entity id="gestureContainer" rotation="0 0 0" scale="0.5 0.5 0.5">
             <a-entity rotation="90 0 0">
-                <a-gltf-model id="facadeUnits" src="#buildingModel2" architectural-outline animation-mixer shadow="cast: true; receive: true" position="0 0 0" rotation="0 0 0" scale="0.01 0.01 0.01"></a-gltf-model>
-                
+                <a-gltf-model id="facadeUnits" src="#buildingModel2" animation-mixer shadow="cast: true; receive: true" position="0 0 0" rotation="0 0 0" scale="0.01 0.01 0.01"></a-gltf-model>
                 <a-gltf-model id="facadeUnits2" src="#buildingModel5" architectural-outline animation-mixer shadow="cast: true; receive: true" 
                               position="0 -0.4 0" rotation="0 0 0" scale="0.01 0.01 0.01"
                               animation="property: position; from: 0 -0.4 0; to: 0 0 0; dur: 2500; easing: cubicBezier(0.25, 1, 0.5, 1); startEvents: startEmergence; autoplay: false">
                 </a-gltf-model>
-                
                 <a-plane position="0 0 0" rotation="-90 0 0" width="5" height="5" material="color: #000000; opacity: 0.5; transparent: true; shadowOnly: true" shadow="receive: true"></a-plane>
             </a-entity>
         </a-entity>
@@ -189,9 +247,21 @@
           const rightActionGroup = document.querySelector('#right-action-group');
           const toggleBtn = document.querySelector('#sun-toggle-btn');
           const controlPanel = document.querySelector('#sun-control-panel');
-          const galleryBtn = document.querySelector('#gallery-btn');
           const facadeUnits2 = document.querySelector('#facadeUnits2');
-          
+
+          // 🎯 照片集相簿控制核心變數
+          const galleryBtn = document.querySelector('#gallery-btn');
+          const lightbox = document.querySelector('#gallery-lightbox');
+          const track = document.querySelector('#slider-track');
+          const dots = document.querySelectorAll('.dot');
+          let currentImgIndex = 0;
+          let touchStartX = 0;
+          let touchEndX = 0;
+
+          const LATITUDE = 25.0;     
+          const LONGITUDE = 121.3;   
+
+          // 日照天文換算
           const sliderMonth = document.querySelector('#slider-month');
           const sliderDay = document.querySelector('#slider-day');
           const sliderHour = document.querySelector('#slider-hour');
@@ -199,19 +269,12 @@
           const valDay = document.querySelector('#val-day');
           const valHour = document.querySelector('#val-hour');
 
-          const LATITUDE = 25.0;     
-          const LONGITUDE = 121.3;   
-
           function updateSunAnalemma() {
               const month = parseInt(sliderMonth.value);
               const day = parseInt(sliderDay.value);
               const hour = parseFloat(sliderHour.value);
-
-              valMonth.innerText = month + " M";
-              valDay.innerText = day + " D";
-              
-              const hInt = Math.floor(hour);
-              const hMin = (hour % 1 === 0.5) ? "30" : "00";
+              valMonth.innerText = month + " M"; valDay.innerText = day + " D";
+              const hInt = Math.floor(hour); const hMin = (hour % 1 === 0.5) ? "30" : "00";
               valHour.innerText = `${hInt}:${hMin}`;
 
               const degToRad = Math.PI / 180;
@@ -219,109 +282,105 @@
               const N = monthDays[month - 1] + day;
               const declination = 23.45 * Math.sin(360 / 365 * (284 + N) * degToRad);
               const hourAngle = (hour - 12) * 15;
-              
-              const latRad = LATITUDE * degToRad;
-              const decRad = declination * degToRad;
-              const hrRad = hourAngle * degToRad;
-              
+              const latRad = LATITUDE * degToRad; const decRad = declination * degToRad; const hrRad = hourAngle * degToRad;
               const sinAltitude = Math.sin(latRad) * Math.sin(decRad) + Math.cos(latRad) * Math.cos(decRad) * Math.cos(hrRad);
               const altitude = Math.asin(sinAltitude);
-              
               const cosAzimuth = (Math.sin(decRad) * Math.cos(latRad) - Math.cos(decRad) * Math.sin(latRad) * Math.cos(hrRad)) / Math.cos(altitude);
               let azimuth = Math.acos(Math.max(-1, Math.min(1, cosAzimuth)));
-              if (hourAngle > 0) {
-                  azimuth = 2 * Math.PI - azimuth;
-              }
+              if (hourAngle > 0) azimuth = 2 * Math.PI - azimuth;
 
               const distance = 4.0; 
-              const x = distance * Math.cos(altitude) * Math.sin(azimuth);
-              const y = distance * Math.sin(altitude);
-              const z = -distance * Math.cos(altitude) * Math.cos(azimuth); 
-
-              if (y < 0) {
-                  sunPosition.setAttribute('light', 'castShadow', false);
-                  sunPosition.setAttribute('position', {x: 0, y: -1, z: 0});
-              } else {
-                  sunPosition.setAttribute('light', 'castShadow', true);
-                  sunPosition.setAttribute('position', { x: x, y: y, z: z });
-              }
+              const x = distance * Math.cos(altitude) * Math.sin(azimuth); const y = distance * Math.sin(altitude); const z = -distance * Math.cos(altitude) * Math.cos(azimuth); 
+              if (y < 0) { sunPosition.setAttribute('light', 'castShadow', false); sunPosition.setAttribute('position', {x: 0, y: -1, z: 0}); }
+              else { sunPosition.setAttribute('light', 'castShadow', true); sunPosition.setAttribute('position', { x: x, y: y, z: z }); }
           }
-
-          sliderMonth.addEventListener('input', updateSunAnalemma);
-          sliderDay.addEventListener('input', updateSunAnalemma);
-          sliderHour.addEventListener('input', updateSunAnalemma);
-
+          sliderMonth.addEventListener('input', updateSunAnalemma); sliderDay.addEventListener('input', updateSunAnalemma); sliderHour.addEventListener('input', updateSunAnalemma);
           updateSunAnalemma();
 
+          // 點擊太陽按鈕，開啟左面板
           toggleBtn.addEventListener('click', () => {
               if (controlPanel.style.display === 'none' || controlPanel.style.display === '') {
-                  controlPanel.style.display = 'block';
-                  toggleBtn.style.background = 'rgba(255, 255, 255, 0.45)';
+                  controlPanel.style.display = 'block'; toggleBtn.style.background = 'rgba(255, 255, 255, 0.45)';
               } else {
-                  controlPanel.style.display = 'none';
-                  toggleBtn.style.background = 'rgba(255, 255, 255, 0.25)';
+                  controlPanel.style.display = 'none'; toggleBtn.style.background = 'rgba(255, 255, 255, 0.25)';
               }
           });
 
+          // 🎯 核心功能：點擊「📸 照片集」彈出磨砂燈箱相簿
           galleryBtn.addEventListener('click', () => {
-              alert("📸 照片集模組已就緒！您可以隨時在此綁定您的渲染圖集。");
+              lightbox.style.display = 'flex';
+              setTimeout(() => { lightbox.style.opacity = '1'; }, 10);
           });
 
-          sceneEl.addEventListener("assets-loaded", () => {
-              if(statusText) statusText.innerText = "Align camera with the target design...";
+          // 🎯 核心功能：點擊相簿外面背景，優雅關閉相簿
+          lightbox.addEventListener('click', (e) => {
+              if (e.target === lightbox) {
+                  lightbox.style.opacity = '0';
+                  setTimeout(() => { lightbox.style.display = 'none'; }, 300);
+              }
           });
-          
+
+          // 🎯 核心功能：手機觸控左右滑動切換圖片演算法 (Swipe-to-Slide)
+          lightbox.addEventListener('touchstart', (e) => {
+              if (e.touches.length === 1) touchStartX = e.touches[0].screenX;
+          });
+          lightbox.addEventListener('touchend', (e) => {
+              if (e.changedTouches.length === 1) {
+                  touchEndX = e.changedTouches[0].screenX;
+                  handleSwipeGesture();
+              }
+          });
+
+          function handleSwipeGesture() {
+              const swipeThreshold = 50; // 超過 50 像素才觸發切換
+              if (touchStartX - touchEndX > swipeThreshold) {
+                  // 向左滑動 ➡️ 看下一張 (第二張)
+                  currentImgIndex = 1;
+              } else if (touchEndX - touchStartX > swipeThreshold) {
+                  // 向右滑動 ➡️ 回上一張 (第一張)
+                  currentImgIndex = 0;
+              }
+              updateSliderPosition();
+          }
+
+          function updateSliderPosition() {
+              // 移動圖片軌道 (0% 或是 -50%)
+              track.style.transform = `translateX(-${currentImgIndex * 50}%)`;
+              // 同步更新 iOS 小指示燈狀態
+              dots.forEach((dot, idx) => {
+                  if (idx === currentImgIndex) dot.classList.add('active');
+                  else dot.classList.remove('active');
+              });
+          }
+
+          // UI 狀態與 AR 追蹤
+          sceneEl.addEventListener("assets-loaded", () => { if(statusText) statusText.innerText = "Align camera with the target design..."; });
           sceneEl.addEventListener("targetFound", () => {
               if(overlay) overlay.classList.add('hidden');
               if(rightActionGroup) rightActionGroup.style.display = 'flex';
-              
-              // 延遲 100 毫秒啟動動畫，避開辨識瞬間的效能峰值
-              setTimeout(() => {
-                  if(facadeUnits2) facadeUnits2.emit('startEmergence');
-              }, 100);
+              setTimeout(() => { if(facadeUnits2) facadeUnits2.emit('startEmergence'); }, 100);
           });
-          
           sceneEl.addEventListener("targetLost", () => {
               if(rightActionGroup) rightActionGroup.style.display = 'none';
-              if(controlPanel) {
-                  controlPanel.style.display = 'none';
-                  toggleBtn.style.background = 'rgba(255, 255, 255, 0.25)';
-              }
-              if(overlay) {
-                  statusText.classList.remove('emergency'); 
-                  overlay.classList.remove('hidden');
-                  statusText.innerText = "EMERGENCY ENGINE";
-                  statusText.classList.add('emergency');
-              }
-              if(facadeUnits2) {
-                  facadeUnits2.setAttribute('position', '0 -0.4 0');
-              }
+              if(controlPanel) { controlPanel.style.display = 'none'; toggleBtn.style.background = 'rgba(255, 255, 255, 0.25)'; }
+              lightbox.style.display = 'none'; lightbox.style.opacity = '0'; // 丟失圖紙時自動收起相簿
+              if(overlay) { statusText.classList.remove('emergency'); overlay.classList.remove('hidden'); statusText.innerText = "EMERGENCY ENGINE"; statusText.classList.add('emergency'); }
+              if(facadeUnits2) facadeUnits2.setAttribute('position', '0 -0.4 0');
           });
 
-          // 雙指純縮放
-          let initialHandDistance = 0;
-          let initialContainerScale = { x: 1, y: 1, z: 1 };
+          // 雙指縮放
+          let initialHandDistance = 0; let initialContainerScale = { x: 0.5, y: 0.5, z: 0.5 };
           window.addEventListener('touchstart', (e) => {
               if (e.touches.length === 2) {
-                  initialHandDistance = Math.hypot(
-                      e.touches[0].pageX - e.touches[1].pageX,
-                      e.touches[0].pageY - e.touches[1].pageY
-                  );
+                  initialHandDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                   initialContainerScale = { ...container.getAttribute('scale') };
               }
           });
           window.addEventListener('touchmove', (e) => {
               if (e.touches.length === 2) {
-                  const currentDistance = Math.hypot(
-                      e.touches[0].pageX - e.touches[1].pageX,
-                      e.touches[0].pageY - e.touches[1].pageY
-                  );
+                  const currentDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                   const factor = currentDistance / initialHandDistance;
-                  container.setAttribute('scale', {
-                      x: initialContainerScale.x * factor,
-                      y: initialContainerScale.y * factor,
-                      z: initialContainerScale.z * factor
-                  });
+                  container.setAttribute('scale', { x: initialContainerScale.x * factor, y: initialContainerScale.y * factor, z: initialContainerScale.z * factor });
               }
           });
       });
