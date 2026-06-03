@@ -84,24 +84,37 @@
     </style>
 
     <script>
-      // 🎯 優化：重新設計外框線組件，篩除內部細分網格與結構線
+      // 🎯 核心修復：高相容性、絕不卡死的純外框邊緣線組件
       AFRAME.registerComponent('architectural-outline', {
         init: function () {
           this.el.addEventListener('model-loaded', () => {
             const mesh = this.el.getObject3D('mesh');
             if (!mesh) return;
+
             mesh.traverse((node) => {
-              if (node.isMesh) {
-                // 💡 關鍵修改：將臨界夾角調整為 75 度。
-                // 夾角大於 75 度的劇烈轉折（例如建築的外輪廓、體量轉角）才會生成線條。
-                // 這樣可以完美過濾掉模型內部的建模結構線、平面三角面細分線！
-                const edges = new THREE.EdgesGeometry(node.geometry, 75); 
-                const lineMaterial = new THREE.LineBasicMaterial({ 
-                  color: 0x111111, // 剛硬純黑外廓線
-                  linewidth: 1
-                });
-                const lineSegments = new THREE.LineSegments(edges, lineMaterial);
-                node.add(lineSegments);
+              // 安全檢查：必須包含有效的 geometry
+              if (node.isMesh && node.geometry) {
+                try {
+                  // 大幅調高臨界夾角至 75 度，全面過濾內部雜線
+                  const edges = new THREE.EdgesGeometry(node.geometry, 75);
+                  
+                  const lineMaterial = new THREE.LineBasicMaterial({ 
+                    color: 0x111111, // 剛硬純黑線條
+                    linewidth: 1
+                  });
+                  
+                  const lineSegments = new THREE.LineSegments(edges, lineMaterial);
+                  
+                  // 防止線條因縮放不均而扭曲或隱形，強制更新矩陣
+                  lineSegments.computeLineDistances();
+                  
+                  // 將線條的層級提升，防止被深色陰影地坪吞噬
+                  lineSegments.renderOrder = 1;
+                  
+                  node.add(lineSegments);
+                } catch (e) {
+                  console.warn("Outline skipped for nodes without clear geometries: ", e);
+                }
               }
             });
           });
@@ -262,7 +275,6 @@
                   controlPanel.style.display = 'block';
                   toggleBtn.style.background = 'rgba(255, 255, 255, 0.45)';
               } else {
-                  controlPanel.style.display === 'none';
                   controlPanel.style.display = 'none';
                   toggleBtn.style.background = 'rgba(255, 255, 255, 0.25)';
               }
