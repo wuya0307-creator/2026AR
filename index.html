@@ -84,7 +84,7 @@
     </style>
 
     <script>
-      // 🎯 新增：註冊一項自訂組件，用來在 .glb 模型載入後，自動為其抓取網格並生成「1px 精細外框邊緣線」
+      // 🎯 優化：重新設計外框線組件，篩除內部細分網格與結構線
       AFRAME.registerComponent('architectural-outline', {
         init: function () {
           this.el.addEventListener('model-loaded', () => {
@@ -92,11 +92,13 @@
             if (!mesh) return;
             mesh.traverse((node) => {
               if (node.isMesh) {
-                // 使用 Three.js 內建的 EdgesGeometry 提取幾何體邊緣
-                const edges = new THREE.EdgesGeometry(node.geometry, 25); // 25 度以上的夾角會生成線條
+                // 💡 關鍵修改：將臨界夾角調整為 75 度。
+                // 夾角大於 75 度的劇烈轉折（例如建築的外輪廓、體量轉角）才會生成線條。
+                // 這樣可以完美過濾掉模型內部的建模結構線、平面三角面細分線！
+                const edges = new THREE.EdgesGeometry(node.geometry, 75); 
                 const lineMaterial = new THREE.LineBasicMaterial({ 
-                  color: 0x222222, // 1PT 精細深灰邊緣線
-                  linewidth: 1     // 保持 1 像素最銳利線寬
+                  color: 0x111111, // 剛硬純黑外廓線
+                  linewidth: 1
                 });
                 const lineSegments = new THREE.LineSegments(edges, lineMaterial);
                 node.add(lineSegments);
@@ -175,9 +177,7 @@
         </a-entity>
 
         <a-light id="sunPosition" type="directional" position="1 3 1" intensity="2.2" castShadow="true" shadowBias="-0.0002" shadowMapWidth="4096" shadowMapHeight="4096" shadowCameraLeft="-0.25" shadowCameraRight="0.25" shadowCameraTop="0.25" shadowCameraBottom="-0.25"></a-light>
-        
         <a-light type="ambient" intensity="0.15"></a-light>
-        
         <a-light type="hemisphere" groundColor="#a3b8cc" color="#ffffff" intensity="0.25"></a-light>
       </a-entity>
     </a-scene>
@@ -262,6 +262,7 @@
                   controlPanel.style.display = 'block';
                   toggleBtn.style.background = 'rgba(255, 255, 255, 0.45)';
               } else {
+                  controlPanel.style.display === 'none';
                   controlPanel.style.display = 'none';
                   toggleBtn.style.background = 'rgba(255, 255, 255, 0.25)';
               }
