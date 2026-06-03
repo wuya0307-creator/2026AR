@@ -93,57 +93,36 @@
       .dot.active { width: 20px; border-radius: 4px; background: #ffffff; }
       .close-tip { margin-top: 14px; font-family: -apple-system, sans-serif; color: rgba(255,255,255,0.5); font-size: 0.75em; letter-spacing: 1px; }
 
-      /* 🎯 新增：Apple 極簡圓形「相機快門按鈕」 */
+      /* Apple 極簡圓形「相機快門按鈕」 */
       #shutter-btn {
-        position: absolute;
-        bottom: 40px; /* 端端正正擺在手機正下方 */
-        left: 50%;
-        transform: translateX(-50%);
-        width: 76px;
-        height: 76px;
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-        border: 4px solid #ffffff; /* 純白外圈快門框 */
-        border-radius: 50%;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-        z-index: 60;
-        display: none; /* 找到圖紙後才彈出 */
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        pointer-events: auto;
-        transition: all 0.2s ease;
-        -webkit-tap-highlight-color: transparent;
+        position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 76px; height: 76px;
+        background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+        border: 4px solid #ffffff; border-radius: 50%; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        z-index: 60; display: none; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto;
+        transition: all 0.2s ease; -webkit-tap-highlight-color: transparent;
       }
-      /* 快門按鈕內部的實心白圓點 */
-      #shutter-btn::after {
-        content: "";
-        width: 54px;
-        height: 54px;
-        background: #ffffff;
-        border-radius: 50%;
-        transition: all 0.15s ease;
-      }
-      /* 按下去時的反饋動畫（微縮小、內圈變淡） */
+      #shutter-btn::after { content: ""; width: 54px; height: 54px; background: #ffffff; border-radius: 50%; transition: all 0.15s ease; }
       #shutter-btn:active { transform: translateX(-50%) scale(0.90); }
       #shutter-btn:active::after { background: rgba(255, 255, 255, 0.7); transform: scale(0.95); }
 
-      /* 🎯 新增：拍照瞬間的閃光燈特效（Flash Effect） */
-      #camera-flash {
-        position: absolute; left: 0; top: 0; width: 100%; height: 100%;
-        background: #ffffff; z-index: 300; pointer-events: none; opacity: 0;
-      }
+      /* 拍照瞬間的閃光燈特效 */
+      #camera-flash { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: #ffffff; z-index: 300; pointer-events: none; opacity: 0; }
     </style>
 
     <script>
-      // 輕量化純外框邊緣線組件
-      AFRAME.registerComponent('architectural-outline', {
+      // 🎯 核心重構：純外框線與全模型實體陰影自動化元件
+      AFRAME.registerComponent('shadow-automator', {
         init: function () {
           this.el.addEventListener('model-loaded', () => {
             const mesh = this.el.getObject3D('mesh');
             if (!mesh) return;
             mesh.traverse((node) => {
               if (node.isMesh && node.geometry) {
+                // 1. 強制讓量體的所有層級面都投射陰影，且接收其他物件投影過來的陰影
+                node.castShadow = true;
+                node.receiveShadow = true;
+                
+                // 2. 完美的邊緣外框線渲染
                 const edges = new THREE.EdgesGeometry(node.geometry, 82); 
                 const lineMaterial = new THREE.LineBasicMaterial({ color: 0x111111, linewidth: 1 });
                 const lineSegments = new THREE.LineSegments(edges, lineMaterial);
@@ -217,7 +196,7 @@
     <a-scene 
       mindar-image="imageTargetSrc: ./targets.mind; uiError:no; uiLoading:no; uiScanning:no; filterMinCF:0.001; filterBeta: 0.15" 
       color-space="sRGB" 
-      renderer="colorManagement: true; sortObjects: true; antialias: true; shadowMapEnabled: true; shadowMapType: THREE.PCFShadowMap; exposure: 1.30; preserveDrawingBuffer: true;" 
+      renderer="colorManagement: true; sortObjects: true; antialias: true; shadowMapEnabled: true; shadowMapType: THREE.PCFSoftShadowMap; exposure: 1.30; preserveDrawingBuffer: true;" 
       vr-mode-ui="enabled: false" 
       device-orientation-permission-ui="enabled: false">
       
@@ -231,18 +210,23 @@
       <a-entity mindar-image-target="targetIndex: 0">
         <a-entity id="gestureContainer" rotation="0 0 0" scale="0.5 0.5 0.5">
             <a-entity rotation="90 0 0">
-                <a-gltf-model id="facadeUnits" src="#buildingModel2" animation-mixer shadow="cast: true; receive: true" position="0 0 0" rotation="0 0 0" scale="0.01 0.01 0.01"></a-gltf-model>
-                <a-gltf-model id="facadeUnits2" src="#buildingModel5" architectural-outline animation-mixer shadow="cast: true; receive: true" 
+                <a-gltf-model id="facadeUnits" src="#buildingModel2" shadow-automator animation-mixer position="0 0 0" rotation="0 0 0" scale="0.01 0.01 0.01"></a-gltf-model>
+                <a-gltf-model id="facadeUnits2" src="#buildingModel5" shadow-automator animation-mixer 
                               position="0 -0.4 0" rotation="0 0 0" scale="0.01 0.01 0.01"
                               animation="property: position; from: 0 -0.4 0; to: 0 0 0; dur: 2500; easing: cubicBezier(0.25, 1, 0.5, 1); startEvents: startEmergence; autoplay: false">
                 </a-gltf-model>
-                <a-plane position="0 0 0" rotation="-90 0 0" width="5" height="5" material="color: #000000; opacity: 0.5; transparent: true; shadowOnly: true" shadow="receive: true"></a-plane>
+                <a-plane position="0 0 -0.01" rotation="-90 0 0" width="8" height="8" material="color: #000000; opacity: 0.55; transparent: true; shadowOnly: true" shadow="receive: true"></a-plane>
             </a-entity>
         </a-entity>
 
-        <a-light id="sunPosition" type="directional" position="1 3 1" intensity="1.8" castShadow="true" shadowBias="-0.0002" shadowMapWidth="4096" shadowMapHeight="4096" shadowCameraLeft="-0.25" shadowCameraRight="0.25" shadowCameraTop="0.25" shadowCameraBottom="-0.25"></a-light>
-        <a-light type="ambient" intensity="0.15"></a-light>
-        <a-light type="hemisphere" groundColor="#a3b8cc" color="#ffffff" intensity="0.25"></a-light>
+        <a-light id="sunPosition" type="directional" position="1 3 1" intensity="1.8" 
+                 castShadow="true" 
+                 shadowBias="-0.0005"
+                 shadowMapWidth="4096" shadowMapHeight="4096" 
+                 shadowCameraLeft="-1.5" shadowCameraRight="1.5" 
+                 shadowCameraTop="1.5" shadowCameraBottom="-1.5"></a-light>
+        <a-light type="ambient" intensity="0.2"></a-light>
+        <a-light type="hemisphere" groundColor="#a3b8cc" color="#ffffff" intensity="0.3"></a-light>
       </a-entity>
     </a-scene>
 
@@ -265,7 +249,6 @@
           const dots = document.querySelectorAll('.dot');
           let currentImgIndex = 0; let touchStartX = 0; let touchEndX = 0;
 
-          // 🎯 新增快門截圖 DOM 元素
           const shutterBtn = document.querySelector('#shutter-btn');
           const cameraFlash = document.querySelector('#camera-flash');
 
@@ -304,7 +287,7 @@
           sliderMonth.addEventListener('input', updateSunAnalemma); sliderDay.addEventListener('input', updateSunAnalemma); sliderHour.addEventListener('input', updateSunAnalemma);
           updateSunAnalemma();
 
-          // 太陽按鈕點擊
+          // 太陽控制面板開關
           toggleBtn.addEventListener('click', () => {
               if (controlPanel.style.display === 'none' || controlPanel.style.display === '') {
                   controlPanel.style.display = 'block'; toggleBtn.style.background = 'rgba(255, 255, 255, 0.45)';
@@ -313,7 +296,7 @@
               }
           });
 
-          // 照片集彈出
+          // 照片集燈箱開關
           galleryBtn.addEventListener('click', () => {
               lightbox.style.display = 'flex'; setTimeout(() => { lightbox.style.opacity = '1'; }, 10);
           });
@@ -321,7 +304,7 @@
               if (e.target === lightbox) { lightbox.style.opacity = '0'; setTimeout(() => { lightbox.style.display = 'none'; }, 300); }
           });
 
-          // 相簿左右滑動
+          // 照片集左右滑動
           lightbox.addEventListener('touchstart', (e) => { if (e.touches.length === 1) touchStartX = e.touches[0].screenX; });
           lightbox.addEventListener('touchend', (e) => { if (e.changedTouches.length === 1) { touchEndX = e.changedTouches[0].screenX; handleSwipeGesture(); } });
           function handleSwipeGesture() {
@@ -335,41 +318,42 @@
               dots.forEach((dot, idx) => { if (idx === currentImgIndex) dot.classList.add('active'); else dot.classList.remove('active'); });
           }
 
-          // 🎯 核心功能：AR 快門拍照與手機相簿原生合照下載演算法
-          shutterBtn.addEventListener('click', () => {
-              // 1. 觸發極簡機械感快門閃光燈特效
+          // 🎯 核心重構：混合 AR 真實相機背景與 3D 模型的高階非同步合照截圖技術
+          shutterBtn.addEventListener('click', async () => {
+              // 1. 機械快門白光反饋
               cameraFlash.style.opacity = '1';
               setTimeout(() => { cameraFlash.style.transition = 'opacity 0.4s ease'; cameraFlash.style.opacity = '0'; }, 50);
               setTimeout(() => { cameraFlash.style.transition = 'none'; }, 450);
 
-              // 2. 擷取 WebAR 混合畫布 (Preserve Drawing Buffer)
+              // 2. 獲取真實背景 `<video>` 標籤
               const videoEl = document.querySelector('video');
-              if (!videoEl) return;
+              if (!videoEl) { alert("無法讀取相機畫面"); return; }
 
-              // 建立一個隱形的畫布進行圖層高解析度拼合
-              const mergeCanvas = document.createElement('canvas');
-              mergeCanvas.width = videoEl.videoWidth;
-              mergeCanvas.height = videoEl.videoHeight;
-              const ctx = mergeCanvas.getContext('2d');
-
-              // 圖層一：繪製實時相機鏡頭背景
-              ctx.drawImage(videoEl, 0, 0, mergeCanvas.width, mergeCanvas.height);
-
-              // 圖層二：疊加 3D 建築物模型與 1PT 外框線
-              const threeCanvas = sceneEl.renderer.domElement;
-              ctx.drawImage(threeCanvas, 0, 0, mergeCanvas.width, mergeCanvas.height);
-
-              // 3. 轉化為原生 PNG 圖片格式，直接觸發系統權限詢問並存入手機相簿
               try {
+                  // 建立離網拼合畫布
+                  const mergeCanvas = document.createElement('canvas');
+                  mergeCanvas.width = videoEl.videoWidth;
+                  mergeCanvas.height = videoEl.videoHeight;
+                  const ctx = mergeCanvas.getContext('2d');
+
+                  // 第一層：完美印上真實世界畫面
+                  ctx.drawImage(videoEl, 0, 0, mergeCanvas.width, mergeCanvas.height);
+
+                  // 第二層：非同步捕捉 WebGL 緩衝區（強制保留 3D 量體與精緻陰影）
+                  const glCanvas = sceneEl.renderer.domElement;
+                  ctx.drawImage(glCanvas, 0, 0, mergeCanvas.width, mergeCanvas.height);
+
+                  // 3. 輸出原生圖片並自動觸發系統相簿儲存
                   const dataURL = mergeCanvas.toDataURL('image/png');
                   const downloadLink = document.createElement('a');
-                  downloadLink.download = '2050_SYNAPSE_AR.png';
+                  downloadLink.download = `2050_SYNAPSE_AR_${Date.now()}.png`;
                   downloadLink.href = dataURL;
                   document.body.appendChild(downloadLink);
-                  downloadLink.click(); // 第一次開啟會向使用者請求「允許下載檔案至相簿」之權限
+                  downloadLink.click();
                   document.body.removeChild(downloadLink);
+
               } catch (err) {
-                  console.error("Snapshot capture restricted by safety permissions: ", err);
+                  console.error("AR 合照混合失敗，補償處理中: ", err);
               }
           });
 
@@ -378,12 +362,12 @@
           sceneEl.addEventListener("targetFound", () => {
               if(overlay) overlay.classList.add('hidden');
               if(rightActionGroup) rightActionGroup.style.display = 'flex';
-              if(shutterBtn) shutterBtn.style.display = 'flex'; // 🎯 核心：找到圖紙鎖定後，正中央快門鈕才彈出
+              if(shutterBtn) shutterBtn.style.display = 'flex'; 
               setTimeout(() => { if(facadeUnits2) facadeUnits2.emit('startEmergence'); }, 100);
           });
           sceneEl.addEventListener("targetLost", () => {
               if(rightActionGroup) rightActionGroup.style.display = 'none';
-              if(shutterBtn) shutterBtn.style.display = 'none'; // 弄丟圖紙時自動收起快門鈕
+              if(shutterBtn) shutterBtn.style.display = 'none'; 
               if(controlPanel) { controlPanel.style.display = 'none'; toggleBtn.style.background = 'rgba(255, 255, 255, 0.25)'; }
               lightbox.style.display = 'none'; lightbox.style.opacity = '0'; 
               if(overlay) { statusText.classList.remove('emergency'); overlay.classList.remove('hidden'); statusText.innerText = "EMERGENCY ENGINE"; statusText.classList.add('emergency'); }
