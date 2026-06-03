@@ -24,42 +24,19 @@
         transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1); 
       }
       #example-scanning-overlay.hidden {
-        opacity: 0;
-        pointer-events: none;
-        display: none !important; 
+        opacity: 0; pointer-events: none; display: none !important; 
       }
       .brand-title {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        color: #1d1d1f; 
-        font-size: 1.4em;
-        font-weight: 600;
-        letter-spacing: 1.5px;
-        margin-bottom: 30px;
-        text-transform: uppercase;
+        color: #1d1d1f; font-size: 1.4em; font-weight: 600; letter-spacing: 1.5px; margin-bottom: 30px; text-transform: uppercase;
       }
       .scanning-target-box {
-        width: 280px;  
-        height: 280px; 
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        width: 280px; height: 280px; position: relative; display: flex; align-items: center; justify-content: center;
         box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5), 0 4px 25px rgba(0, 0, 0, 0.05);
-        border-radius: 20px;
-        background-image: url('./LOGO.png'); 
-        background-size: 80% 80%; 
-        background-position: center;
-        background-repeat: no-repeat;
-        background-color: rgba(255, 255, 255, 0.25); 
-        background-blend-mode: overlay;
+        border-radius: 20px; background-image: url('./LOGO.png'); background-size: 80% 80%; background-position: center; background-repeat: no-repeat; background-color: rgba(255, 255, 255, 0.25); background-blend-mode: overlay;
       }
-      .scanning-target-box-corners {
-        position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none;
-      }
-      .scanning-target-box-corners::before,
-      .scanning-target-box-corners::after {
-        content: ""; position: absolute; width: 25px; height: 25px; border-style: solid; border-color: #ffffff;
-      }
+      .scanning-target-box-corners { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; }
+      .scanning-target-box-corners::before, .scanning-target-box-corners::after { content: ""; position: absolute; width: 25px; height: 25px; border-style: solid; border-color: #ffffff; }
       .scanning-target-box-corners::before { top: 0; left: 0; border-width: 4px 0 0 4px; border-top-left-radius: 16px; }
       .scanning-target-box-corners::after { top: 0; right: 0; border-width: 4px 4px 0 0; border-top-right-radius: 16px; }
       .corner-bl { position: absolute; bottom: 0; left: 0; width: 25px; height: 25px; border-style: solid; border-color: #ffffff; border-width: 0 0 4px 4px; border-bottom-left-radius: 16px; }
@@ -68,73 +45,47 @@
       .scanning-text.emergency { color: #ff3b30; font-weight: 700; letter-spacing: 1px; animation: apple-pulse 2s infinite ease-in-out; }
       @keyframes apple-pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
-      /* 🎯 新增：Apple 磨砂質感「太陽互動按鈕」 */
+      /* Apple 磨砂質感「太陽互動按鈕」 */
       #sun-toggle-btn {
-        position: absolute;
-        top: 20px;
-        right: 20px; /* 擺在右上角，不會跟控制面板打架 */
-        width: 50px;
-        height: 50px;
-        background: rgba(255, 255, 255, 0.25);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        border-radius: 50%; /* 完美圓形 */
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        z-index: 60; /* 浮在最上層 */
-        display: none; /* 找到圖紙後才顯示 */
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        pointer-events: auto;
-        transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-        -webkit-tap-highlight-color: transparent;
+        position: absolute; top: 20px; right: 20px; width: 50px; height: 50px;
+        background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        z-index: 60; display: none; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto;
+        transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); -webkit-tap-highlight-color: transparent;
       }
-      #sun-toggle-btn:active {
-        transform: scale(0.92); /* 點擊時內縮回饋 */
-      }
-      /* 使用 SVG 繪製高質感極簡太陽幾何圖形 */
-      #sun-toggle-btn svg {
-        width: 26px;
-        height: 26px;
-        fill: #1d1d1f;
-      }
+      #sun-toggle-btn:active { transform: scale(0.92); }
+      #sun-toggle-btn svg { width: 26px; height: 26px; fill: #1d1d1f; }
 
       /* 左側半透明磨砂玻璃控制欄位 */
       #sun-control-panel {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        width: 240px;
-        padding: 16px 20px;
-        background: rgba(255, 255, 255, 0.25); 
-        backdrop-filter: blur(20px); 
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        border-radius: 16px;
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
-        z-index: 50; 
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        color: #1d1d1f;
-        pointer-events: auto; 
-        display: none; /* 初始隱藏，點擊按鈕才切換 */
-        transition: opacity 0.3s ease;
+        position: absolute; top: 20px; left: 20px; width: 240px; padding: 16px 20px;
+        background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 16px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+        z-index: 50; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1d1d1f;
+        pointer-events: auto; display: none; transition: opacity 0.3s ease;
       }
       .panel-header {
-        font-size: 0.85em;
-        font-weight: 700;
-        letter-spacing: 1px;
-        margin-bottom: 12px;
-        text-transform: uppercase;
-        color: #000000;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        padding-bottom: 6px;
+        font-size: 0.85em; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px;
+        text-transform: uppercase; color: #000000; border-bottom: 1px solid rgba(0, 0, 0, 0.1); padding-bottom: 6px;
       }
       .control-group { margin-bottom: 10px; }
-      .control-group:last-child { margin-bottom: 0; }
       .control-label { display: flex; justify-content: space-between; font-size: 0.8em; font-weight: 500; color: #3a3a3c; margin-bottom: 4px; }
       .control-slider { width: 100%; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: rgba(0, 0, 0, 0.15); outline: none; margin: 8px 0; }
       .control-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer; }
+
+      /* 🎯 新增：作品集與照片集按鈕樣式 */
+      .panel-divider {
+        margin: 14px 0 10px 0; border-top: 1px solid rgba(0, 0, 0, 0.1);
+      }
+      .link-button {
+        display: flex; align-items: center; justify-content: center; width: 100%; height: 38px;
+        margin-bottom: 8px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.3); color: #1d1d1f; font-size: 0.85em; font-weight: 600;
+        text-decoration: none; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        transition: all 0.2s ease; -webkit-tap-highlight-color: transparent;
+      }
+      .link-button:last-child { margin-bottom: 0; }
+      .link-button:active { background: rgba(255, 255, 255, 0.50); transform: scale(0.97); }
     </style>
   </head>
   <body>
@@ -156,7 +107,7 @@
     </div>
 
     <div id="sun-control-panel">
-      <div class="panel-header">Solar Analemma Control</div>
+      <div class="panel-header">Solar Analemma Panel</div>
       <div class="control-group">
         <div class="control-label"><span>Month</span><span id="val-month">6</span></div>
         <input type="range" id="slider-month" class="control-slider" min="1" max="12" value="6">
@@ -169,12 +120,16 @@
         <div class="control-label"><span>Hour</span><span id="val-hour">14:00</span></div>
         <input type="range" id="slider-hour" class="control-slider" min="5" max="19" step="0.5" value="14">
       </div>
+
+      <div class="panel-divider"></div>
+      <a href="https://twist-waltz-02301407.figma.site/" target="_blank" class="link-button">📁 Portfolio 作品集</a>
+      <button id="gallery-btn" class="link-button">📸 Gallery 照片集</button>
     </div>
 
     <a-scene 
       mindar-image="imageTargetSrc: ./targets.mind; uiError:no; uiLoading:no; uiScanning:no; filterMinCF:0.0005; filterBeta: 0.1" 
       color-space="sRGB" 
-      renderer="colorManagement: true; sortObjects: true; antialias: true; shadowMapEnabled: true; shadowMapType: THREE.PCFShadowMap;" 
+      renderer="colorManagement: true; sortObjects: true; antialias: true; shadowMapEnabled: true; shadowMapType: THREE.PCFSoftShadowMap; exposure: 1.1;" 
       vr-mode-ui="enabled: false" 
       device-orientation-permission-ui="enabled: false">
       
@@ -191,12 +146,28 @@
             <a-entity rotation="90 0 0">
                 <a-gltf-model id="facadeUnits" src="#buildingModel2" animation-mixer shadow="cast: true; receive: true" position="0 0 0" rotation="0 0 0" scale="0.01 0.01 0.01"></a-gltf-model>
                 <a-gltf-model id="facadeUnits2" src="#buildingModel5" animation-mixer shadow="cast: true; receive: true" position="0 0 0" rotation="0 0 0" scale="0.01 0.01 0.01"></a-gltf-model>
-                <a-plane position="0 0 0" rotation="-90 0 0" width="5" height="5" material="color: #000000; opacity: 0.45; transparent: true; shadowOnly: true" shadow="receive: true"></a-plane>
+                
+                <a-plane position="0 0 0" rotation="-90 0 0" width="5" height="5" material="color: #000000; opacity: 0.5; transparent: true; shadowOnly: true" shadow="receive: true"></a-plane>
             </a-entity>
         </a-entity>
 
-        <a-light id="sunPosition" type="directional" position="1 3 1" intensity="1.3" castShadow="true" shadowBias="-0.0003" shadowMapWidth="4096" shadowMapHeight="4096" shadowCameraLeft="-0.3" shadowCameraRight="0.3" shadowCameraTop="0.3" shadowCameraBottom="-0.3"></a-light>
-        <a-light type="ambient" intensity="0.4"></a-light>
+        <a-light id="sunPosition" type="directional" 
+                 position="1 3 1" 
+                 intensity="2.2" 
+                 castShadow="true"
+                 shadowBias="-0.0002"
+                 shadowMapWidth="4096"
+                 shadowMapHeight="4096"
+                 shadowCameraLeft="-0.25" 
+                 shadowCameraRight="0.25" 
+                 shadowCameraTop="0.25" 
+                 shadowCameraBottom="-0.25">
+        </a-light>
+        
+        <a-light type="ambient" intensity="0.2"></a-light>
+
+        <a-light type="hemisphere" groundColor="#a3b8cc" color="#ffffff" intensity="0.45"></a-light>
+
       </a-entity>
     </a-scene>
 
@@ -208,9 +179,10 @@
           const statusText = document.querySelector('#statusText');
           const container = document.querySelector('#gestureContainer');
           
-          // 取得 UI DOM 元素
           const toggleBtn = document.querySelector('#sun-toggle-btn');
           const controlPanel = document.querySelector('#sun-control-panel');
+          const galleryBtn = document.querySelector('#gallery-btn');
+          
           const sliderMonth = document.querySelector('#slider-month');
           const sliderDay = document.querySelector('#slider-day');
           const sliderHour = document.querySelector('#slider-hour');
@@ -271,18 +243,22 @@
           sliderDay.addEventListener('input', updateSunAnalemma);
           sliderHour.addEventListener('input', updateSunAnalemma);
 
-          // 預先啟動一次初始值
           updateSunAnalemma();
 
-          // 🎯 核心功能：點擊太陽符號，切換控制面板的顯示或隱藏
+          // 點擊太陽符號，切換面板顯示
           toggleBtn.addEventListener('click', () => {
               if (controlPanel.style.display === 'none' || controlPanel.style.display === '') {
                   controlPanel.style.display = 'block';
-                  toggleBtn.style.background = 'rgba(255, 255, 255, 0.45)'; // 展開時按鈕微變亮
+                  toggleBtn.style.background = 'rgba(255, 255, 255, 0.45)';
               } else {
                   controlPanel.style.display = 'none';
-                  toggleBtn.style.background = 'rgba(255, 255, 255, 0.25)'; // 隱藏時恢復
+                  toggleBtn.style.background = 'rgba(255, 255, 255, 0.25)';
               }
+          });
+
+          // 照片集預留按鈕點擊事件（可自行加載燈箱或跳轉）
+          galleryBtn.addEventListener('click', () => {
+              alert("📸 照片集模組已就緒！您可以隨時在此綁定您的渲染圖集。");
           });
 
           // UI 狀態控制
@@ -291,11 +267,11 @@
           });
           sceneEl.addEventListener("targetFound", () => {
               if(overlay) overlay.classList.add('hidden');
-              if(toggleBtn) toggleBtn.style.display = 'flex'; // 🎯 核心：找到圖紙後，太陽按鈕才高雅地浮現
+              if(toggleBtn) toggleBtn.style.display = 'flex';
           });
           sceneEl.addEventListener("targetLost", () => {
               if(toggleBtn) toggleBtn.style.display = 'none';
-              if(controlPanel) controlPanel.style.display = 'none'; // 遺失圖紙時全部收起來
+              if(controlPanel) controlPanel.style.display = 'none';
               if(overlay) {
                   statusText.classList.remove('emergency'); 
                   overlay.classList.remove('hidden');
