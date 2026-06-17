@@ -37,19 +37,12 @@
       .scanning-text.emergency { color: #ff3b30; font-weight: 700; letter-spacing: 1px; animation: apple-pulse 2s infinite ease-in-out; }
       @keyframes apple-pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
-      /* 右上角 UI 按鈕群組 */
+      /* 右上角 UI 按鈕群組容器 */
       #right-action-group {
         position: absolute; top: 20px; right: 20px; width: 50px; display: none; flex-direction: column; align-items: center; gap: 12px; z-index: 60;
       }
-      #sun-toggle-btn {
-        width: 50px; height: 50px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto;
-        transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); -webkit-tap-highlight-color: transparent;
-      }
-      #sun-toggle-btn:active { transform: scale(0.92); }
-      #sun-toggle-btn svg { width: 24px; height: 24px; fill: #1d1d1f; }
-
+      
+      /* 通用圓形磨砂玻璃按鈕 */
       .circle-action-btn {
         width: 50px; height: 50px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -58,13 +51,36 @@
       }
       .circle-action-btn:active { transform: scale(0.92); background: rgba(255, 255, 255, 0.45); }
       .circle-action-btn svg { width: 24px; height: 24px; stroke: #ffffff; stroke-width: 1.8px; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      #sun-toggle-btn svg { fill: #1d1d1f; stroke: none; }
+
+      /* 圖層選擇彈出選單 UI (Popover Menu) */
+      #layer-popover-menu {
+        position: absolute; top: 20px; right: 80px; width: 190px;
+        background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 14px; box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+        z-index: 70; font-family: -apple-system, BlinkMacSystemFont, sans-serif; display: none; padding: 6px; pointer-events: auto;
+      }
+      .layer-menu-item {
+        display: flex; align-items: center; justify-content: space-between; padding: 10px 12px;
+        color: #1d1d1f; font-size: 0.85em; font-weight: 600; cursor: pointer; border-radius: 8px;
+        transition: background 0.2s; -webkit-tap-highlight-color: transparent;
+      }
+      .layer-menu-item:active { background: rgba(0,0,0,0.08); }
+      .layer-checkbox {
+        width: 18px; height: 18px; border-radius: 5px; border: 2px solid #ffffff;
+        background: rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+      }
+      .layer-checkbox.checked { background: #1d1d1f; border-color: #1d1d1f; }
+      .layer-checkbox.checked::after {
+        content: ""; width: 4px; height: 8px; border: solid #ffffff; border-width: 0 2px 2px 0; transform: rotate(45deg); margin-bottom: 2px;
+      }
 
       /* 左側半透明磨砂玻璃控制欄位 */
       #sun-control-panel {
         position: absolute; top: 20px; left: 20px; width: 240px; padding: 16px 20px;
         background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 16px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
-        z-index: 50; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1d1d1f;
+        z-index: 50; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #1d1d1f;
         pointer-events: auto; display: none; transition: opacity 0.3s ease;
       }
       .panel-header {
@@ -83,11 +99,47 @@
         z-index: 200; display: none; opacity: 0; align-items: center; justify-content: center;
         transition: opacity 0.3s ease; pointer-events: auto;
       }
-      .lightbox-container { position: relative; width: 85%; max-width: 500px; display: flex; flex-direction: column; align-items: center; }
-      .slider-wrapper { width: 100%; overflow: hidden; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); background: rgba(0,0,0,0.1); }
-      .slider-track { display: flex; width: 200%; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
-      .slider-item { width: 50%; display: flex; align-items: center; justify-content: center; }
-      .slider-item img { width: 100%; height: auto; display: block; object-fit: contain; }
+      
+      /* 🎯 修正：限制灰色大框框有固定的高度比例 (5:4)，防止被不同照片撐變形 */
+      .lightbox-container { 
+        position: relative; width: 85%; max-width: 500px; 
+        display: flex; flex-direction: column; align-items: center; 
+      }
+      .slider-wrapper { 
+        width: 100%; height: 420px; /* 🎯 固定相簿大框框高度 */
+        overflow: hidden; border-radius: 16px; 
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3); background: rgba(0, 0, 0, 0.2); 
+        position: relative;
+      }
+      .slider-track { display: flex; width: 400%; height: 100%; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+      
+      /* 🎯 修正：每個相簿滑動單元改為相對定位，並預留底部 45 像素給文字 */
+      .slider-item { 
+        width: 25%; height: 100%; display: flex; flex-direction: column; 
+        align-items: center; justify-content: center; box-sizing: border-box; 
+        padding-bottom: 50px; /* 為底部絕對置中的文字預留死空間 */
+        position: relative; 
+      }
+      
+      /* 🎯 修正：圖片在剩餘的灰色空間中自動等比例收縮居中，絕對不擠壓文字 */
+      .slider-item img { 
+        max-width: 90%; max-height: 82%; display: block; object-fit: contain; border-radius: 8px;
+      }
+      
+      /* 🎯 終極修正：將文字說明區塊改成「絕對底部定位」，高度死死扣在灰色外框的中央底部，完全不受照片比例干擾！ */
+      .text-container {
+        position: absolute;
+        bottom: 15px; /* 死死鎖定在灰色框底部往上 15px 的位置 */
+        left: 0; width: 100%;
+        display: flex; align-items: center; justify-content: center; 
+        text-align: center; height: 25px; pointer-events: none;
+      }
+      .image-name { 
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+        color: #ffffff; font-size: 0.85em; font-weight: 600; letter-spacing: 1.2px;
+        text-align: center; width: 100%; display: block; margin: 0 auto;
+      }
+
       .slider-dots { display: flex; gap: 8px; margin-top: 16px; }
       .dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.3); transition: all 0.2s ease; }
       .dot.active { width: 20px; border-radius: 4px; background: #ffffff; }
@@ -105,24 +157,20 @@
       #shutter-btn:active { transform: translateX(-50%) scale(0.90); }
       #shutter-btn:active::after { background: rgba(255, 255, 255, 0.7); transform: scale(0.95); }
 
-      /* 拍照瞬間的閃光燈特效 */
       #camera-flash { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: #ffffff; z-index: 300; pointer-events: none; opacity: 0; }
     </style>
 
     <script>
-      // 🎯 核心重構：純外框線與全模型實體陰影自動化元件
-      AFRAME.registerComponent('shadow-automator', {
+      // 🎯 修正：精準註冊【僅有 MODEL-5 會被附加上 1PT 剛硬外框線】的組件
+      AFRAME.registerComponent('architectural-outline', {
         init: function () {
           this.el.addEventListener('model-loaded', () => {
             const mesh = this.el.getObject3D('mesh');
             if (!mesh) return;
             mesh.traverse((node) => {
               if (node.isMesh && node.geometry) {
-                // 1. 強制讓量體的所有層級面都投射陰影，且接收其他物件投影過來的陰影
                 node.castShadow = true;
                 node.receiveShadow = true;
-                
-                // 2. 完美的邊緣外框線渲染
                 const edges = new THREE.EdgesGeometry(node.geometry, 82); 
                 const lineMaterial = new THREE.LineBasicMaterial({ color: 0x111111, linewidth: 1 });
                 const lineSegments = new THREE.LineSegments(edges, lineMaterial);
@@ -147,20 +195,40 @@
     </div>
 
     <div id="camera-flash"></div>
-
     <div id="shutter-btn" title="拍照留存"></div>
 
     <div id="right-action-group">
-      <div id="sun-toggle-btn">
+      <div id="layer-toggle-btn" class="circle-action-btn" title="切換模型圖層">
+        <svg viewBox="0 0 24 24">
+          <polygon points="12 2 2 7 12 12 22 7 12 2" />
+          <polyline points="2 17 12 22 22 17" />
+          <polyline points="2 12 12 17 22 12" />
+        </svg>
+      </div>
+
+      <div id="sun-toggle-btn" class="circle-action-btn" title="日照面板">
         <svg viewBox="0 0 24 24">
           <path d="M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5S14.76,7,12,7L12,7z M2,13h2c0.55,0,1-0.45,1-1s-0.45-1-1-1H2 c-0.55,0-1,0.45-1,1S1.45,13,2,13L2,13z M20,13h2c0.55,0,1-0.45,1-1s-0.45-1-1-1h-2c-0.55,0-1,0.45-1,1S19.45,13,20,13L20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2L11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2 c0-0.55-0.45-1-1-1S11,19.45,11,20L11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0s-0.39,1.03,0,1.41l1.06,1.06 c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95c-0.39-0.39-1.03-0.39-1.41,0s-0.39,1.03,0,1.41l1.06,1.06 c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L18.36,16.95z M7.05,18.36l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0l1.06-1.06c0.39-0.39,0.39-1.03,0-1.41S7.44,17.96,7.05,18.36z M16.95,5.99l1.06-1.06c0.39-0.39,0.39-1.03,0-1.41 s-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41S16.56,6.38,16.95,5.99z"/>
         </svg>
       </div>
+
       <a href="https://twist-waltz-02301407.figma.site/" target="_blank" class="circle-action-btn" title="作品集">
         <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
       </a>
+
       <div id="gallery-btn" class="circle-action-btn" title="照片集">
         <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+      </div>
+    </div>
+
+    <div id="layer-popover-menu">
+      <div class="layer-menu-item" id="item-model2">
+        <span>MODEL-2 主體結構</span>
+        <div class="layer-checkbox checked" id="chk-model2"></div>
+      </div>
+      <div class="layer-menu-item" id="item-model5">
+        <span>MODEL-5 生長量體</span>
+        <div class="layer-checkbox checked" id="chk-model5"></div>
       </div>
     </div>
 
@@ -184,11 +252,30 @@
       <div class="lightbox-container">
         <div class="slider-wrapper">
           <div class="slider-track" id="slider-track">
-            <div class="slider-item"><img src="./OUTSIDE OFFICE RENDER.png" alt="Outside Render"></div>
-            <div class="slider-item"><img src="./INSIDE OFFICEA RENDER.png" alt="Inside Render"></div>
+            <div class="slider-item">
+              <img src="./ENTRANCE.png" alt="Entrance Render">
+              <div class="text-container"><div class="image-name">ENTRANCE RENDER</div></div>
+            </div>
+            <div class="slider-item">
+              <img src="./EXHIBITION.png" alt="Exhibition Render">
+              <div class="text-container"><div class="image-name">EXHIBITION RENDER</div></div>
+            </div>
+            <div class="slider-item">
+              <img src="./CONTEXT RENER01.png" alt="Context Render 01">
+              <div class="text-container"><div class="image-name">CONTEXT RENDER 01</div></div>
+            </div>
+            <div class="slider-item">
+              <img src="./CONTEXT RENER02.png" alt="Context Render 02">
+              <div class="text-container"><div class="image-name">CONTEXT RENDER 02</div></div>
+            </div>
           </div>
         </div>
-        <div class="slider-dots"><div class="dot active"></div><div class="dot"></div></div>
+        <div class="slider-dots">
+          <div class="dot active"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
         <div class="close-tip">TAP OUTSIDE TO CLOSE</div>
       </div>
     </div>
@@ -209,22 +296,22 @@
 
       <a-entity mindar-image-target="targetIndex: 0">
         <a-entity id="gestureContainer" rotation="0 0 0" scale="0.5 0.5 0.5">
-            <a-entity rotation="90 0 0">
-                <a-gltf-model id="facadeUnits" src="#buildingModel2" shadow-automator animation-mixer position="0 0 0" rotation="0 0 0" scale="0.01 0.01 0.01"></a-gltf-model>
-                <a-gltf-model id="facadeUnits2" src="#buildingModel5" shadow-automator animation-mixer 
+            <a-entity id="modelGroup" rotation="90 0 0">
+                <a-gltf-model id="facadeUnits" src="#buildingModel2" animation-mixer shadow="cast: true; receive: true" position="0 0 0" rotation="0 0 0" scale="0.01 0.01 0.01"></a-gltf-model>
+                
+                <a-gltf-model id="facadeUnits2" src="#buildingModel5" architectural-outline animation-mixer shadow="cast: true; receive: true" 
                               position="0 -0.4 0" rotation="0 0 0" scale="0.01 0.01 0.01"
                               animation="property: position; from: 0 -0.4 0; to: 0 0 0; dur: 2500; easing: cubicBezier(0.25, 1, 0.5, 1); startEvents: startEmergence; autoplay: false">
                 </a-gltf-model>
+                
                 <a-plane position="0 0 -0.01" rotation="-90 0 0" width="8" height="8" material="color: #000000; opacity: 0.55; transparent: true; shadowOnly: true" shadow="receive: true"></a-plane>
             </a-entity>
         </a-entity>
 
         <a-light id="sunPosition" type="directional" position="1 3 1" intensity="1.8" 
-                 castShadow="true" 
-                 shadowBias="-0.0005"
+                 castShadow="true" shadowBias="-0.0005"
                  shadowMapWidth="4096" shadowMapHeight="4096" 
-                 shadowCameraLeft="-1.5" shadowCameraRight="1.5" 
-                 shadowCameraTop="1.5" shadowCameraBottom="-1.5"></a-light>
+                 shadowCameraLeft="-1.5" shadowCameraRight="-1.5" shadowCameraTop="1.5" shadowCameraBottom="-1.5"></a-light>
         <a-light type="ambient" intensity="0.2"></a-light>
         <a-light type="hemisphere" groundColor="#a3b8cc" color="#ffffff" intensity="0.3"></a-light>
       </a-entity>
@@ -241,6 +328,7 @@
           const rightActionGroup = document.querySelector('#right-action-group');
           const toggleBtn = document.querySelector('#sun-toggle-btn');
           const controlPanel = document.querySelector('#sun-control-panel');
+          const facadeUnits = document.querySelector('#facadeUnits');
           const facadeUnits2 = document.querySelector('#facadeUnits2');
 
           const galleryBtn = document.querySelector('#gallery-btn');
@@ -252,9 +340,18 @@
           const shutterBtn = document.querySelector('#shutter-btn');
           const cameraFlash = document.querySelector('#camera-flash');
 
-          const LATITUDE = 25.0; const LONGITUDE = 121.3;   
+          // 圖層 Popover 控制項
+          const layerToggleBtn = document.querySelector('#layer-toggle-btn');
+          const layerPopoverMenu = document.querySelector('#layer-popover-menu');
+          const itemModel2 = document.querySelector('#item-model2');
+          const itemModel5 = document.querySelector('#item-model5');
+          const chkModel2 = document.querySelector('#chk-model2');
+          const chkModel5 = document.querySelector('#chk-model5');
 
-          // 日照滑桿
+          let showModel2 = true; let showModel5 = true;
+          const LATITUDE = 25.0;
+
+          // 日照控制滑桿
           const sliderMonth = document.querySelector('#slider-month');
           const sliderDay = document.querySelector('#slider-day');
           const sliderHour = document.querySelector('#slider-hour');
@@ -287,10 +384,39 @@
           sliderMonth.addEventListener('input', updateSunAnalemma); sliderDay.addEventListener('input', updateSunAnalemma); sliderHour.addEventListener('input', updateSunAnalemma);
           updateSunAnalemma();
 
-          // 太陽控制面板開關
-          toggleBtn.addEventListener('click', () => {
+          // 🎯 圖層選單點擊觸發 (打通選單機制)
+          layerToggleBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const isHidden = layerPopoverMenu.style.display === 'none' || layerPopoverMenu.style.display === '';
+              layerPopoverMenu.style.display = isHidden ? 'block' : 'none';
+              if (isHidden) controlPanel.style.display = 'none'; // 關閉太陽面板
+          });
+
+          itemModel2.addEventListener('click', (e) => {
+              e.stopPropagation(); showModel2 = !showModel2;
+              facadeUnits.setAttribute('visible', showModel2);
+              if (showModel2) chkModel2.classList.add('checked'); else chkModel2.classList.remove('checked');
+          });
+
+          itemModel5.addEventListener('click', (e) => {
+              e.stopPropagation(); showModel5 = !showModel5;
+              facadeUnits2.setAttribute('visible', showModel5);
+              if (showModel5) chkModel5.classList.add('checked'); else chkModel5.classList.remove('checked');
+          });
+
+          // 點擊背景自動關閉選單
+          document.addEventListener('click', (e) => {
+              if (e.target !== layerToggleBtn && !layerPopoverMenu.contains(e.target)) {
+                  layerPopoverMenu.style.display = 'none';
+              }
+          });
+
+          // 太陽控制開關
+          toggleBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
               if (controlPanel.style.display === 'none' || controlPanel.style.display === '') {
                   controlPanel.style.display = 'block'; toggleBtn.style.background = 'rgba(255, 255, 255, 0.45)';
+                  layerPopoverMenu.style.display = 'none';
               } else {
                   controlPanel.style.display = 'none'; toggleBtn.style.background = 'rgba(255, 255, 255, 0.25)';
               }
@@ -304,60 +430,50 @@
               if (e.target === lightbox) { lightbox.style.opacity = '0'; setTimeout(() => { lightbox.style.display = 'none'; }, 300); }
           });
 
-          // 照片集左右滑動
+          // 照片集左右觸控滑動
           lightbox.addEventListener('touchstart', (e) => { if (e.touches.length === 1) touchStartX = e.touches[0].screenX; });
           lightbox.addEventListener('touchend', (e) => { if (e.changedTouches.length === 1) { touchEndX = e.changedTouches[0].screenX; handleSwipeGesture(); } });
           function handleSwipeGesture() {
               const swipeThreshold = 50;
-              if (touchStartX - touchEndX > swipeThreshold) currentImgIndex = 1;
-              else if (touchEndX - touchStartX > swipeThreshold) currentImgIndex = 0;
+              if (touchStartX - touchEndX > swipeThreshold) currentImgIndex = (currentImgIndex + 1) % 4;
+              else if (touchEndX - touchStartX > swipeThreshold) currentImgIndex = (currentImgIndex - 1 + 4) % 4;
               updateSliderPosition();
           }
           function updateSliderPosition() {
-              track.style.transform = `translateX(-${currentImgIndex * 50}%)`;
+              track.style.transform = `translateX(-${currentImgIndex * 25}%)`;
               dots.forEach((dot, idx) => { if (idx === currentImgIndex) dot.classList.add('active'); else dot.classList.remove('active'); });
           }
 
-          // 🎯 核心重構：混合 AR 真實相機背景與 3D 模型的高階非同步合照截圖技術
+          // 📸 高解析度 AR 雙圖層完美合照技術
           shutterBtn.addEventListener('click', async () => {
-              // 1. 機械快門白光反饋
               cameraFlash.style.opacity = '1';
               setTimeout(() => { cameraFlash.style.transition = 'opacity 0.4s ease'; cameraFlash.style.opacity = '0'; }, 50);
               setTimeout(() => { cameraFlash.style.transition = 'none'; }, 450);
 
-              // 2. 獲取真實背景 `<video>` 標籤
               const videoEl = document.querySelector('video');
-              if (!videoEl) { alert("無法讀取相機畫面"); return; }
+              if (!videoEl) return;
 
               try {
-                  // 建立離網拼合畫布
                   const mergeCanvas = document.createElement('canvas');
-                  mergeCanvas.width = videoEl.videoWidth;
-                  mergeCanvas.height = videoEl.videoHeight;
+                  mergeCanvas.width = videoEl.videoWidth; mergeCanvas.height = videoEl.videoHeight;
                   const ctx = mergeCanvas.getContext('2d');
 
-                  // 第一層：完美印上真實世界畫面
+                  // 一層印鏡頭，二層疊模型
                   ctx.drawImage(videoEl, 0, 0, mergeCanvas.width, mergeCanvas.height);
-
-                  // 第二層：非同步捕捉 WebGL 緩衝區（強制保留 3D 量體與精緻陰影）
                   const glCanvas = sceneEl.renderer.domElement;
                   ctx.drawImage(glCanvas, 0, 0, mergeCanvas.width, mergeCanvas.height);
 
-                  // 3. 輸出原生圖片並自動觸發系統相簿儲存
                   const dataURL = mergeCanvas.toDataURL('image/png');
                   const downloadLink = document.createElement('a');
                   downloadLink.download = `2050_SYNAPSE_AR_${Date.now()}.png`;
-                  downloadLink.href = dataURL;
-                  document.body.appendChild(downloadLink);
-                  downloadLink.click();
-                  document.body.removeChild(downloadLink);
-
+                  downloadLink.href = dataURL; document.body.appendChild(downloadLink);
+                  downloadLink.click(); document.body.removeChild(downloadLink);
               } catch (err) {
-                  console.error("AR 合照混合失敗，補償處理中: ", err);
+                  console.error("Snapshot capture restricted: ", err);
               }
           });
 
-          // UI 狀態與 AR 追蹤
+          // AR 追蹤模組狀態監聽
           sceneEl.addEventListener("assets-loaded", () => { if(statusText) statusText.innerText = "Align camera with the target design..."; });
           sceneEl.addEventListener("targetFound", () => {
               if(overlay) overlay.classList.add('hidden');
@@ -369,12 +485,13 @@
               if(rightActionGroup) rightActionGroup.style.display = 'none';
               if(shutterBtn) shutterBtn.style.display = 'none'; 
               if(controlPanel) { controlPanel.style.display = 'none'; toggleBtn.style.background = 'rgba(255, 255, 255, 0.25)'; }
+              layerPopoverMenu.style.display = 'none';
               lightbox.style.display = 'none'; lightbox.style.opacity = '0'; 
               if(overlay) { statusText.classList.remove('emergency'); overlay.classList.remove('hidden'); statusText.innerText = "EMERGENCY ENGINE"; statusText.classList.add('emergency'); }
               if(facadeUnits2) facadeUnits2.setAttribute('position', '0 -0.4 0');
           });
 
-          // 雙指縮放
+          // 雙指手勢縮放
           let initialHandDistance = 0; let initialContainerScale = { x: 0.5, y: 0.5, z: 0.5 };
           window.addEventListener('touchstart', (e) => {
               if (e.touches.length === 2) {
