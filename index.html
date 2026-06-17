@@ -100,37 +100,31 @@
         transition: opacity 0.3s ease; pointer-events: auto;
       }
       
-      /* 🎯 修正：限制灰色大框框有固定的高度比例 (5:4)，防止被不同照片撐變形 */
       .lightbox-container { 
         position: relative; width: 85%; max-width: 500px; 
         display: flex; flex-direction: column; align-items: center; 
       }
       .slider-wrapper { 
-        width: 100%; height: 420px; /* 🎯 固定相簿大框框高度 */
+        width: 100%; height: 420px; 
         overflow: hidden; border-radius: 16px; 
         box-shadow: 0 10px 40px rgba(0,0,0,0.3); background: rgba(0, 0, 0, 0.2); 
         position: relative;
       }
       .slider-track { display: flex; width: 400%; height: 100%; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
       
-      /* 🎯 修正：每個相簿滑動單元改為相對定位，並預留底部 45 像素給文字 */
       .slider-item { 
         width: 25%; height: 100%; display: flex; flex-direction: column; 
         align-items: center; justify-content: center; box-sizing: border-box; 
-        padding-bottom: 50px; /* 為底部絕對置中的文字預留死空間 */
+        padding-bottom: 50px; 
         position: relative; 
       }
       
-      /* 🎯 修正：圖片在剩餘的灰色空間中自動等比例收縮居中，絕對不擠壓文字 */
       .slider-item img { 
         max-width: 90%; max-height: 82%; display: block; object-fit: contain; border-radius: 8px;
       }
       
-      /* 🎯 終極修正：將文字說明區塊改成「絕對底部定位」，高度死死扣在灰色外框的中央底部，完全不受照片比例干擾！ */
       .text-container {
-        position: absolute;
-        bottom: 15px; /* 死死鎖定在灰色框底部往上 15px 的位置 */
-        left: 0; width: 100%;
+        position: absolute; bottom: 15px; left: 0; width: 100%;
         display: flex; align-items: center; justify-content: center; 
         text-align: center; height: 25px; pointer-events: none;
       }
@@ -222,9 +216,9 @@
     </div>
 
     <div id="layer-popover-menu">
-      <div class="layer-menu-item" id="item-model2">
-        <span>MODEL-2 主體結構</span>
-        <div class="layer-checkbox checked" id="chk-model2"></div>
+      <div class="layer-menu-item" id="item-grid">
+        <span>RHINO 工作網格</span>
+        <div class="layer-checkbox checked" id="chk-grid"></div>
       </div>
       <div class="layer-menu-item" id="item-model5">
         <span>MODEL-5 生長量體</span>
@@ -288,7 +282,6 @@
       device-orientation-permission-ui="enabled: false">
       
       <a-assets timeout="30000">
-        <a-asset-item id="buildingModel2" src="./MODEL-2.glb"></a-asset-item>
         <a-asset-item id="buildingModel5" src="./MODEL-5.glb"></a-asset-item>
       </a-assets>
 
@@ -297,14 +290,21 @@
       <a-entity mindar-image-target="targetIndex: 0">
         <a-entity id="gestureContainer" rotation="0 0 0" scale="0.5 0.5 0.5">
             <a-entity id="modelGroup" rotation="90 0 0">
-                <a-gltf-model id="facadeUnits" src="#buildingModel2" animation-mixer shadow="cast: true; receive: true" position="0 0 0" rotation="0 0 0" scale="0.01 0.01 0.01"></a-gltf-model>
                 
                 <a-gltf-model id="facadeUnits2" src="#buildingModel5" architectural-outline animation-mixer shadow="cast: true; receive: true" 
                               position="0 -0.4 0" rotation="0 0 0" scale="0.01 0.01 0.01"
                               animation="property: position; from: 0 -0.4 0; to: 0 0 0; dur: 2500; easing: cubicBezier(0.25, 1, 0.5, 1); startEvents: startEmergence; autoplay: false">
                 </a-gltf-model>
                 
-                <a-plane position="0 0 -0.01" rotation="-90 0 0" width="8" height="8" material="color: #000000; opacity: 0.55; transparent: true; shadowOnly: true" shadow="receive: true"></a-plane>
+                <a-entity id="rhinoGrid" 
+                          geometry="primitive: plane; width: 8; height: 8;"
+                          material="color: #ffffff; opacity: 0.60; transparent: true; wireframe: true; wireframeLinewidth: 1.5; shader: flat;"
+                          position="0 0 -0.005"
+                          shadow="receive: true">
+                </a-entity>
+                
+                <a-plane id="shadowFloor" position="0 0 -0.01" rotation="0 0 0" width="8" height="8" material="color: #000000; opacity: 0.35; transparent: true; shadowOnly: true" shadow="receive: true"></a-plane>
+
             </a-entity>
         </a-entity>
 
@@ -328,7 +328,6 @@
           const rightActionGroup = document.querySelector('#right-action-group');
           const toggleBtn = document.querySelector('#sun-toggle-btn');
           const controlPanel = document.querySelector('#sun-control-panel');
-          const facadeUnits = document.querySelector('#facadeUnits');
           const facadeUnits2 = document.querySelector('#facadeUnits2');
 
           const galleryBtn = document.querySelector('#gallery-btn');
@@ -343,12 +342,14 @@
           // 圖層 Popover 控制項
           const layerToggleBtn = document.querySelector('#layer-toggle-btn');
           const layerPopoverMenu = document.querySelector('#layer-popover-menu');
-          const itemModel2 = document.querySelector('#item-model2');
+          const itemGrid = document.querySelector('#item-grid');
           const itemModel5 = document.querySelector('#item-model5');
-          const chkModel2 = document.querySelector('#chk-model2');
+          const chkGrid = document.querySelector('#chk-grid');
           const chkModel5 = document.querySelector('#chk-model5');
+          const rhinoGrid = document.querySelector('#rhinoGrid');
+          const shadowFloor = document.querySelector('#shadowFloor');
 
-          let showModel2 = true; let showModel5 = true;
+          let showGrid = true; let showModel5 = true;
           const LATITUDE = 25.0;
 
           // 日照控制滑桿
@@ -384,27 +385,29 @@
           sliderMonth.addEventListener('input', updateSunAnalemma); sliderDay.addEventListener('input', updateSunAnalemma); sliderHour.addEventListener('input', updateSunAnalemma);
           updateSunAnalemma();
 
-          // 🎯 圖層選單點擊觸發 (打通選單機制)
+          // 圖層選單點擊觸發
           layerToggleBtn.addEventListener('click', (e) => {
               e.stopPropagation();
               const isHidden = layerPopoverMenu.style.display === 'none' || layerPopoverMenu.style.display === '';
               layerPopoverMenu.style.display = isHidden ? 'block' : 'none';
-              if (isHidden) controlPanel.style.display = 'none'; // 關閉太陽面板
+              if (isHidden) controlPanel.style.display = 'none'; 
           });
 
-          itemModel2.addEventListener('click', (e) => {
-              e.stopPropagation(); showModel2 = !showModel2;
-              facadeUnits.setAttribute('visible', showModel2);
-              if (showModel2) chkModel2.classList.add('checked'); else chkModel2.classList.remove('checked');
+          // 網格開關
+          itemGrid.addEventListener('click', (e) => {
+              e.stopPropagation(); showGrid = !showGrid;
+              rhinoGrid.setAttribute('visible', showGrid);
+              shadowFloor.setAttribute('visible', showGrid);
+              if (showGrid) chkGrid.classList.add('checked'); else chkGrid.classList.remove('checked');
           });
 
+          // MODEL-5 開關
           itemModel5.addEventListener('click', (e) => {
               e.stopPropagation(); showModel5 = !showModel5;
               facadeUnits2.setAttribute('visible', showModel5);
               if (showModel5) chkModel5.classList.add('checked'); else chkModel5.classList.remove('checked');
           });
 
-          // 點擊背景自動關閉選單
           document.addEventListener('click', (e) => {
               if (e.target !== layerToggleBtn && !layerPopoverMenu.contains(e.target)) {
                   layerPopoverMenu.style.display = 'none';
@@ -444,7 +447,7 @@
               dots.forEach((dot, idx) => { if (idx === currentImgIndex) dot.classList.add('active'); else dot.classList.remove('active'); });
           }
 
-          // 📸 高解析度 AR 雙圖層完美合照技術
+          // 高解析度 AR 雙圖層合照技術
           shutterBtn.addEventListener('click', async () => {
               cameraFlash.style.opacity = '1';
               setTimeout(() => { cameraFlash.style.transition = 'opacity 0.4s ease'; cameraFlash.style.opacity = '0'; }, 50);
@@ -458,7 +461,6 @@
                   mergeCanvas.width = videoEl.videoWidth; mergeCanvas.height = videoEl.videoHeight;
                   const ctx = mergeCanvas.getContext('2d');
 
-                  // 一層印鏡頭，二層疊模型
                   ctx.drawImage(videoEl, 0, 0, mergeCanvas.width, mergeCanvas.height);
                   const glCanvas = sceneEl.renderer.domElement;
                   ctx.drawImage(glCanvas, 0, 0, mergeCanvas.width, mergeCanvas.height);
