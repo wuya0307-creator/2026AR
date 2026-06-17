@@ -11,21 +11,13 @@
     <style>
       /* Apple 極簡遮罩 UI */
       #example-scanning-overlay {
-        position: absolute;
-        left: 0; right: 0; top: 0; bottom: 0;
+        position: absolute; left: 0; right: 0; top: 0; bottom: 0;
         background: rgba(230, 230, 232, 0.6); 
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        z-index: 100;
-        pointer-events: none;
-        opacity: 1;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        z-index: 100; pointer-events: none; opacity: 1;
         transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1); 
       }
-      #example-scanning-overlay.hidden {
-        opacity: 0; pointer-events: none; display: none !important; 
-      }
+      #example-scanning-overlay.hidden { opacity: 0; pointer-events: none; display: none !important; }
       .brand-title {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         color: #1d1d1f; font-size: 1.4em; font-weight: 600; letter-spacing: 1.5px; margin-bottom: 30px; text-transform: uppercase;
@@ -45,16 +37,27 @@
       .scanning-text.emergency { color: #ff3b30; font-weight: 700; letter-spacing: 1px; animation: apple-pulse 2s infinite ease-in-out; }
       @keyframes apple-pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
-      /* Apple 磨砂質感「太陽互動按鈕」 */
+      /* 右上角 UI 按鈕群組 */
+      #right-action-group {
+        position: absolute; top: 20px; right: 20px; width: 50px; display: none; flex-direction: column; align-items: center; gap: 12px; z-index: 60;
+      }
       #sun-toggle-btn {
-        position: absolute; top: 20px; right: 20px; width: 50px; height: 50px;
-        background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        width: 50px; height: 50px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        z-index: 60; display: none; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto;
+        display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto;
         transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); -webkit-tap-highlight-color: transparent;
       }
       #sun-toggle-btn:active { transform: scale(0.92); }
-      #sun-toggle-btn svg { width: 26px; height: 26px; fill: #1d1d1f; }
+      #sun-toggle-btn svg { width: 24px; height: 24px; fill: #1d1d1f; }
+
+      .circle-action-btn {
+        width: 50px; height: 50px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 50%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto;
+        transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1); -webkit-tap-highlight-color: transparent;
+      }
+      .circle-action-btn:active { transform: scale(0.92); background: rgba(255, 255, 255, 0.45); }
+      .circle-action-btn svg { width: 24px; height: 24px; stroke: #ffffff; stroke-width: 1.8px; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 
       /* 左側半透明磨砂玻璃控制欄位 */
       #sun-control-panel {
@@ -73,20 +76,63 @@
       .control-slider { width: 100%; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: rgba(0, 0, 0, 0.15); outline: none; margin: 8px 0; }
       .control-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer; }
 
-      /* 🎯 新增：作品集與照片集按鈕樣式 */
-      .panel-divider {
-        margin: 14px 0 10px 0; border-top: 1px solid rgba(0, 0, 0, 0.1);
+      /* 高級磨砂玻璃相簿燈箱 */
+      #gallery-lightbox {
+        position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+        background: rgba(30, 30, 32, 0.5); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+        z-index: 200; display: none; opacity: 0; align-items: center; justify-content: center;
+        transition: opacity 0.3s ease; pointer-events: auto;
       }
-      .link-button {
-        display: flex; align-items: center; justify-content: center; width: 100%; height: 38px;
-        margin-bottom: 8px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.5);
-        background: rgba(255, 255, 255, 0.3); color: #1d1d1f; font-size: 0.85em; font-weight: 600;
-        text-decoration: none; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      .lightbox-container { position: relative; width: 85%; max-width: 500px; display: flex; flex-direction: column; align-items: center; }
+      .slider-wrapper { width: 100%; overflow: hidden; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); background: rgba(0,0,0,0.1); }
+      .slider-track { display: flex; width: 200%; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+      .slider-item { width: 50%; display: flex; align-items: center; justify-content: center; }
+      .slider-item img { width: 100%; height: auto; display: block; object-fit: contain; }
+      .slider-dots { display: flex; gap: 8px; margin-top: 16px; }
+      .dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.3); transition: all 0.2s ease; }
+      .dot.active { width: 20px; border-radius: 4px; background: #ffffff; }
+      .close-tip { margin-top: 14px; font-family: -apple-system, sans-serif; color: rgba(255,255,255,0.5); font-size: 0.75em; letter-spacing: 1px; }
+
+      /* Apple 極簡圓形「相機快門按鈕」 */
+      #shutter-btn {
+        position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 76px; height: 76px;
+        background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+        border: 4px solid #ffffff; border-radius: 50%; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        z-index: 60; display: none; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto;
         transition: all 0.2s ease; -webkit-tap-highlight-color: transparent;
       }
-      .link-button:last-child { margin-bottom: 0; }
-      .link-button:active { background: rgba(255, 255, 255, 0.50); transform: scale(0.97); }
+      #shutter-btn::after { content: ""; width: 54px; height: 54px; background: #ffffff; border-radius: 50%; transition: all 0.15s ease; }
+      #shutter-btn:active { transform: translateX(-50%) scale(0.90); }
+      #shutter-btn:active::after { background: rgba(255, 255, 255, 0.7); transform: scale(0.95); }
+
+      /* 拍照瞬間的閃光燈特效 */
+      #camera-flash { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: #ffffff; z-index: 300; pointer-events: none; opacity: 0; }
     </style>
+
+    <script>
+      // 🎯 核心重構：純外框線與全模型實體陰影自動化元件
+      AFRAME.registerComponent('shadow-automator', {
+        init: function () {
+          this.el.addEventListener('model-loaded', () => {
+            const mesh = this.el.getObject3D('mesh');
+            if (!mesh) return;
+            mesh.traverse((node) => {
+              if (node.isMesh && node.geometry) {
+                // 1. 強制讓量體的所有層級面都投射陰影，且接收其他物件投影過來的陰影
+                node.castShadow = true;
+                node.receiveShadow = true;
+                
+                // 2. 完美的邊緣外框線渲染
+                const edges = new THREE.EdgesGeometry(node.geometry, 82); 
+                const lineMaterial = new THREE.LineBasicMaterial({ color: 0x111111, linewidth: 1 });
+                const lineSegments = new THREE.LineSegments(edges, lineMaterial);
+                node.add(lineSegments);
+              }
+            });
+          });
+        }
+      });
+    </script>
   </head>
   <body>
 
@@ -100,10 +146,22 @@
       <div class="scanning-text" id="statusText">Loading Architectural Massing...</div>
     </div>
 
-    <div id="sun-toggle-btn">
-      <svg viewBox="0 0 24 24">
-        <path d="M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5S14.76,7,12,7L12,7z M2,13h2c0.55,0,1-0.45,1-1s-0.45-1-1-1H2 c-0.55,0-1,0.45-1,1S1.45,13,2,13L2,13z M20,13h2c0.55,0,1-0.45,1-1s-0.45-1-1-1h-2c-0.55,0-1,0.45-1,1S19.45,13,20,13L20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2L11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2 c0-0.55-0.45-1-1-1S11,19.45,11,20L11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0s-0.39,1.03,0,1.41l1.06,1.06 c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95c-0.39-0.39-1.03-0.39-1.41,0s-0.39,1.03,0,1.41l1.06,1.06 c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L18.36,16.95z M7.05,18.36l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0l1.06-1.06c0.39-0.39,0.39-1.03,0-1.41S7.44,17.96,7.05,18.36z M16.95,5.99l1.06-1.06c0.39-0.39,0.39-1.03,0-1.41 s-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41S16.56,6.38,16.95,5.99z"/>
-      </svg>
+    <div id="camera-flash"></div>
+
+    <div id="shutter-btn" title="拍照留存"></div>
+
+    <div id="right-action-group">
+      <div id="sun-toggle-btn">
+        <svg viewBox="0 0 24 24">
+          <path d="M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5S14.76,7,12,7L12,7z M2,13h2c0.55,0,1-0.45,1-1s-0.45-1-1-1H2 c-0.55,0-1,0.45-1,1S1.45,13,2,13L2,13z M20,13h2c0.55,0,1-0.45,1-1s-0.45-1-1-1h-2c-0.55,0-1,0.45-1,1S19.45,13,20,13L20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2L11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2 c0-0.55-0.45-1-1-1S11,19.45,11,20L11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0s-0.39,1.03,0,1.41l1.06,1.06 c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95c-0.39-0.39-1.03-0.39-1.41,0s-0.39,1.03,0,1.41l1.06,1.06 c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L18.36,16.95z M7.05,18.36l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0l1.06-1.06c0.39-0.39,0.39-1.03,0-1.41S7.44,17.96,7.05,18.36z M16.95,5.99l1.06-1.06c0.39-0.39,0.39-1.03,0-1.41 s-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41S16.56,6.38,16.95,5.99z"/>
+        </svg>
+      </div>
+      <a href="https://twist-waltz-02301407.figma.site/" target="_blank" class="circle-action-btn" title="作品集">
+        <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+      </a>
+      <div id="gallery-btn" class="circle-action-btn" title="照片集">
+        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+      </div>
     </div>
 
     <div id="sun-control-panel">
@@ -120,16 +178,25 @@
         <div class="control-label"><span>Hour</span><span id="val-hour">14:00</span></div>
         <input type="range" id="slider-hour" class="control-slider" min="5" max="19" step="0.5" value="14">
       </div>
+    </div>
 
-      <div class="panel-divider"></div>
-      <a href="https://twist-waltz-02301407.figma.site/" target="_blank" class="link-button">📁 Portfolio 作品集</a>
-      <button id="gallery-btn" class="link-button">📸 Gallery 照片集</button>
+    <div id="gallery-lightbox">
+      <div class="lightbox-container">
+        <div class="slider-wrapper">
+          <div class="slider-track" id="slider-track">
+            <div class="slider-item"><img src="./OUTSIDE OFFICE RENDER.png" alt="Outside Render"></div>
+            <div class="slider-item"><img src="./INSIDE OFFICEA RENDER.png" alt="Inside Render"></div>
+          </div>
+        </div>
+        <div class="slider-dots"><div class="dot active"></div><div class="dot"></div></div>
+        <div class="close-tip">TAP OUTSIDE TO CLOSE</div>
+      </div>
     </div>
 
     <a-scene 
-      mindar-image="imageTargetSrc: ./targets.mind; uiError:no; uiLoading:no; uiScanning:no; filterMinCF:0.0005; filterBeta: 0.1" 
+      mindar-image="imageTargetSrc: ./targets.mind; uiError:no; uiLoading:no; uiScanning:no; filterMinCF:0.001; filterBeta: 0.15" 
       color-space="sRGB" 
-      renderer="colorManagement: true; sortObjects: true; antialias: true; shadowMapEnabled: true; shadowMapType: THREE.PCFSoftShadowMap; exposure: 1.1;" 
+      renderer="colorManagement: true; sortObjects: true; antialias: true; shadowMapEnabled: true; shadowMapType: THREE.PCFSoftShadowMap; exposure: 1.30; preserveDrawingBuffer: true;" 
       vr-mode-ui="enabled: false" 
       device-orientation-permission-ui="enabled: false">
       
@@ -138,36 +205,28 @@
         <a-asset-item id="buildingModel5" src="./MODEL-5.glb"></a-asset-item>
       </a-assets>
 
-      <a-camera position="0 0.3 1" fov="35" rotation="-15 0 0" look-controls="enabled: false">
-      </a-camera>
+      <a-camera position="0 0.3 1" fov="35" rotation="-15 0 0" look-controls="enabled: false"></a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0">
-        <a-entity id="gestureContainer" rotation="0 0 0" scale="1 1 1">
+        <a-entity id="gestureContainer" rotation="0 0 0" scale="0.5 0.5 0.5">
             <a-entity rotation="90 0 0">
-                <a-gltf-model id="facadeUnits" src="#buildingModel2" animation-mixer shadow="cast: true; receive: true" position="0 0 0" rotation="0 0 0" scale="0.01 0.01 0.01"></a-gltf-model>
-                <a-gltf-model id="facadeUnits2" src="#buildingModel5" animation-mixer shadow="cast: true; receive: true" position="0 0 0" rotation="0 0 0" scale="0.01 0.01 0.01"></a-gltf-model>
-                
-                <a-plane position="0 0 0" rotation="-90 0 0" width="5" height="5" material="color: #000000; opacity: 0.5; transparent: true; shadowOnly: true" shadow="receive: true"></a-plane>
+                <a-gltf-model id="facadeUnits" src="#buildingModel2" shadow-automator animation-mixer position="0 0 0" rotation="0 0 0" scale="0.01 0.01 0.01"></a-gltf-model>
+                <a-gltf-model id="facadeUnits2" src="#buildingModel5" shadow-automator animation-mixer 
+                              position="0 -0.4 0" rotation="0 0 0" scale="0.01 0.01 0.01"
+                              animation="property: position; from: 0 -0.4 0; to: 0 0 0; dur: 2500; easing: cubicBezier(0.25, 1, 0.5, 1); startEvents: startEmergence; autoplay: false">
+                </a-gltf-model>
+                <a-plane position="0 0 -0.01" rotation="-90 0 0" width="8" height="8" material="color: #000000; opacity: 0.55; transparent: true; shadowOnly: true" shadow="receive: true"></a-plane>
             </a-entity>
         </a-entity>
 
-        <a-light id="sunPosition" type="directional" 
-                 position="1 3 1" 
-                 intensity="2.2" 
-                 castShadow="true"
-                 shadowBias="-0.0002"
-                 shadowMapWidth="4096"
-                 shadowMapHeight="4096"
-                 shadowCameraLeft="-0.25" 
-                 shadowCameraRight="0.25" 
-                 shadowCameraTop="0.25" 
-                 shadowCameraBottom="-0.25">
-        </a-light>
-        
+        <a-light id="sunPosition" type="directional" position="1 3 1" intensity="1.8" 
+                 castShadow="true" 
+                 shadowBias="-0.0005"
+                 shadowMapWidth="4096" shadowMapHeight="4096" 
+                 shadowCameraLeft="-1.5" shadowCameraRight="1.5" 
+                 shadowCameraTop="1.5" shadowCameraBottom="-1.5"></a-light>
         <a-light type="ambient" intensity="0.2"></a-light>
-
-        <a-light type="hemisphere" groundColor="#a3b8cc" color="#ffffff" intensity="0.45"></a-light>
-
+        <a-light type="hemisphere" groundColor="#a3b8cc" color="#ffffff" intensity="0.3"></a-light>
       </a-entity>
     </a-scene>
 
@@ -179,10 +238,23 @@
           const statusText = document.querySelector('#statusText');
           const container = document.querySelector('#gestureContainer');
           
+          const rightActionGroup = document.querySelector('#right-action-group');
           const toggleBtn = document.querySelector('#sun-toggle-btn');
           const controlPanel = document.querySelector('#sun-control-panel');
+          const facadeUnits2 = document.querySelector('#facadeUnits2');
+
           const galleryBtn = document.querySelector('#gallery-btn');
-          
+          const lightbox = document.querySelector('#gallery-lightbox');
+          const track = document.querySelector('#slider-track');
+          const dots = document.querySelectorAll('.dot');
+          let currentImgIndex = 0; let touchStartX = 0; let touchEndX = 0;
+
+          const shutterBtn = document.querySelector('#shutter-btn');
+          const cameraFlash = document.querySelector('#camera-flash');
+
+          const LATITUDE = 25.0; const LONGITUDE = 121.3;   
+
+          // 日照滑桿
           const sliderMonth = document.querySelector('#slider-month');
           const sliderDay = document.querySelector('#slider-day');
           const sliderHour = document.querySelector('#slider-hour');
@@ -190,20 +262,10 @@
           const valDay = document.querySelector('#val-day');
           const valHour = document.querySelector('#val-hour');
 
-          // 基地地理資訊嚴格鎖定：
-          const LATITUDE = 25.0;     
-          const LONGITUDE = 121.3;   
-
           function updateSunAnalemma() {
-              const month = parseInt(sliderMonth.value);
-              const day = parseInt(sliderDay.value);
-              const hour = parseFloat(sliderHour.value);
-
-              valMonth.innerText = month + " M";
-              valDay.innerText = day + " D";
-              
-              const hInt = Math.floor(hour);
-              const hMin = (hour % 1 === 0.5) ? "30" : "00";
+              const month = parseInt(sliderMonth.value); const day = parseInt(sliderDay.value); const hour = parseFloat(sliderHour.value);
+              valMonth.innerText = month + " M"; valDay.innerText = day + " D";
+              const hInt = Math.floor(hour); const hMin = (hour % 1 === 0.5) ? "30" : "00";
               valHour.innerText = `${hInt}:${hMin}`;
 
               const degToRad = Math.PI / 180;
@@ -211,99 +273,120 @@
               const N = monthDays[month - 1] + day;
               const declination = 23.45 * Math.sin(360 / 365 * (284 + N) * degToRad);
               const hourAngle = (hour - 12) * 15;
-              
-              const latRad = LATITUDE * degToRad;
-              const decRad = declination * degToRad;
-              const hrRad = hourAngle * degToRad;
-              
+              const latRad = LATITUDE * degToRad; const decRad = declination * degToRad; const hrRad = hourAngle * degToRad;
               const sinAltitude = Math.sin(latRad) * Math.sin(decRad) + Math.cos(latRad) * Math.cos(decRad) * Math.cos(hrRad);
               const altitude = Math.asin(sinAltitude);
-              
               const cosAzimuth = (Math.sin(decRad) * Math.cos(latRad) - Math.cos(decRad) * Math.sin(latRad) * Math.cos(hrRad)) / Math.cos(altitude);
               let azimuth = Math.acos(Math.max(-1, Math.min(1, cosAzimuth)));
-              if (hourAngle > 0) {
-                  azimuth = 2 * Math.PI - azimuth;
-              }
+              if (hourAngle > 0) azimuth = 2 * Math.PI - azimuth;
 
-              const distance = 4.0; 
-              const x = distance * Math.cos(altitude) * Math.sin(azimuth);
-              const y = distance * Math.sin(altitude);
-              const z = -distance * Math.cos(altitude) * Math.cos(azimuth); 
-
-              if (y < 0) {
-                  sunPosition.setAttribute('light', 'castShadow', false);
-                  sunPosition.setAttribute('position', {x: 0, y: -1, z: 0});
-              } else {
-                  sunPosition.setAttribute('light', 'castShadow', true);
-                  sunPosition.setAttribute('position', { x: x, y: y, z: z });
-              }
+              const distance = 4.0; const x = distance * Math.cos(altitude) * Math.sin(azimuth); const y = distance * Math.sin(altitude); const z = -distance * Math.cos(altitude) * Math.cos(azimuth); 
+              if (y < 0) { sunPosition.setAttribute('light', 'castShadow', false); sunPosition.setAttribute('position', {x: 0, y: -1, z: 0}); }
+              else { sunPosition.setAttribute('light', 'castShadow', true); sunPosition.setAttribute('position', { x: x, y: y, z: z }); }
           }
-
-          sliderMonth.addEventListener('input', updateSunAnalemma);
-          sliderDay.addEventListener('input', updateSunAnalemma);
-          sliderHour.addEventListener('input', updateSunAnalemma);
-
+          sliderMonth.addEventListener('input', updateSunAnalemma); sliderDay.addEventListener('input', updateSunAnalemma); sliderHour.addEventListener('input', updateSunAnalemma);
           updateSunAnalemma();
 
-          // 點擊太陽符號，切換面板顯示
+          // 太陽控制面板開關
           toggleBtn.addEventListener('click', () => {
               if (controlPanel.style.display === 'none' || controlPanel.style.display === '') {
-                  controlPanel.style.display = 'block';
-                  toggleBtn.style.background = 'rgba(255, 255, 255, 0.45)';
+                  controlPanel.style.display = 'block'; toggleBtn.style.background = 'rgba(255, 255, 255, 0.45)';
               } else {
-                  controlPanel.style.display = 'none';
-                  toggleBtn.style.background = 'rgba(255, 255, 255, 0.25)';
+                  controlPanel.style.display = 'none'; toggleBtn.style.background = 'rgba(255, 255, 255, 0.25)';
               }
           });
 
-          // 照片集預留按鈕點擊事件（可自行加載燈箱或跳轉）
+          // 照片集燈箱開關
           galleryBtn.addEventListener('click', () => {
-              alert("📸 照片集模組已就緒！您可以隨時在此綁定您的渲染圖集。");
+              lightbox.style.display = 'flex'; setTimeout(() => { lightbox.style.opacity = '1'; }, 10);
+          });
+          lightbox.addEventListener('click', (e) => {
+              if (e.target === lightbox) { lightbox.style.opacity = '0'; setTimeout(() => { lightbox.style.display = 'none'; }, 300); }
           });
 
-          // UI 狀態控制
-          sceneEl.addEventListener("assets-loaded", () => {
-              if(statusText) statusText.innerText = "Align camera with the target design...";
+          // 照片集左右滑動
+          lightbox.addEventListener('touchstart', (e) => { if (e.touches.length === 1) touchStartX = e.touches[0].screenX; });
+          lightbox.addEventListener('touchend', (e) => { if (e.changedTouches.length === 1) { touchEndX = e.changedTouches[0].screenX; handleSwipeGesture(); } });
+          function handleSwipeGesture() {
+              const swipeThreshold = 50;
+              if (touchStartX - touchEndX > swipeThreshold) currentImgIndex = 1;
+              else if (touchEndX - touchStartX > swipeThreshold) currentImgIndex = 0;
+              updateSliderPosition();
+          }
+          function updateSliderPosition() {
+              track.style.transform = `translateX(-${currentImgIndex * 50}%)`;
+              dots.forEach((dot, idx) => { if (idx === currentImgIndex) dot.classList.add('active'); else dot.classList.remove('active'); });
+          }
+
+          // 🎯 核心重構：混合 AR 真實相機背景與 3D 模型的高階非同步合照截圖技術
+          shutterBtn.addEventListener('click', async () => {
+              // 1. 機械快門白光反饋
+              cameraFlash.style.opacity = '1';
+              setTimeout(() => { cameraFlash.style.transition = 'opacity 0.4s ease'; cameraFlash.style.opacity = '0'; }, 50);
+              setTimeout(() => { cameraFlash.style.transition = 'none'; }, 450);
+
+              // 2. 獲取真實背景 `<video>` 標籤
+              const videoEl = document.querySelector('video');
+              if (!videoEl) { alert("無法讀取相機畫面"); return; }
+
+              try {
+                  // 建立離網拼合畫布
+                  const mergeCanvas = document.createElement('canvas');
+                  mergeCanvas.width = videoEl.videoWidth;
+                  mergeCanvas.height = videoEl.videoHeight;
+                  const ctx = mergeCanvas.getContext('2d');
+
+                  // 第一層：完美印上真實世界畫面
+                  ctx.drawImage(videoEl, 0, 0, mergeCanvas.width, mergeCanvas.height);
+
+                  // 第二層：非同步捕捉 WebGL 緩衝區（強制保留 3D 量體與精緻陰影）
+                  const glCanvas = sceneEl.renderer.domElement;
+                  ctx.drawImage(glCanvas, 0, 0, mergeCanvas.width, mergeCanvas.height);
+
+                  // 3. 輸出原生圖片並自動觸發系統相簿儲存
+                  const dataURL = mergeCanvas.toDataURL('image/png');
+                  const downloadLink = document.createElement('a');
+                  downloadLink.download = `2050_SYNAPSE_AR_${Date.now()}.png`;
+                  downloadLink.href = dataURL;
+                  document.body.appendChild(downloadLink);
+                  downloadLink.click();
+                  document.body.removeChild(downloadLink);
+
+              } catch (err) {
+                  console.error("AR 合照混合失敗，補償處理中: ", err);
+              }
           });
+
+          // UI 狀態與 AR 追蹤
+          sceneEl.addEventListener("assets-loaded", () => { if(statusText) statusText.innerText = "Align camera with the target design..."; });
           sceneEl.addEventListener("targetFound", () => {
               if(overlay) overlay.classList.add('hidden');
-              if(toggleBtn) toggleBtn.style.display = 'flex';
+              if(rightActionGroup) rightActionGroup.style.display = 'flex';
+              if(shutterBtn) shutterBtn.style.display = 'flex'; 
+              setTimeout(() => { if(facadeUnits2) facadeUnits2.emit('startEmergence'); }, 100);
           });
           sceneEl.addEventListener("targetLost", () => {
-              if(toggleBtn) toggleBtn.style.display = 'none';
-              if(controlPanel) controlPanel.style.display = 'none';
-              if(overlay) {
-                  statusText.classList.remove('emergency'); 
-                  overlay.classList.remove('hidden');
-                  statusText.innerText = "EMERGENCY ENGINE";
-                  statusText.classList.add('emergency');
-              }
+              if(rightActionGroup) rightActionGroup.style.display = 'none';
+              if(shutterBtn) shutterBtn.style.display = 'none'; 
+              if(controlPanel) { controlPanel.style.display = 'none'; toggleBtn.style.background = 'rgba(255, 255, 255, 0.25)'; }
+              lightbox.style.display = 'none'; lightbox.style.opacity = '0'; 
+              if(overlay) { statusText.classList.remove('emergency'); overlay.classList.remove('hidden'); statusText.innerText = "EMERGENCY ENGINE"; statusText.classList.add('emergency'); }
+              if(facadeUnits2) facadeUnits2.setAttribute('position', '0 -0.4 0');
           });
 
-          // 雙指純縮放
-          let initialHandDistance = 0;
-          let initialContainerScale = { x: 1, y: 1, z: 1 };
+          // 雙指縮放
+          let initialHandDistance = 0; let initialContainerScale = { x: 0.5, y: 0.5, z: 0.5 };
           window.addEventListener('touchstart', (e) => {
               if (e.touches.length === 2) {
-                  initialHandDistance = Math.hypot(
-                      e.touches[0].pageX - e.touches[1].pageX,
-                      e.touches[0].pageY - e.touches[1].pageY
-                  );
+                  initialHandDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                   initialContainerScale = { ...container.getAttribute('scale') };
               }
           });
           window.addEventListener('touchmove', (e) => {
               if (e.touches.length === 2) {
-                  const currentDistance = Math.hypot(
-                      e.touches[0].pageX - e.touches[1].pageX,
-                      e.touches[0].pageY - e.touches[1].pageY
-                  );
+                  const currentDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                   const factor = currentDistance / initialHandDistance;
-                  container.setAttribute('scale', {
-                      x: initialContainerScale.x * factor,
-                      y: initialContainerScale.y * factor,
-                      z: initialContainerScale.z * factor
-                  });
+                  container.setAttribute('scale', { x: initialContainerScale.x * factor, y: initialContainerScale.y * factor, z: initialContainerScale.z * factor });
               }
           });
       });
