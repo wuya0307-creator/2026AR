@@ -155,7 +155,7 @@
     </style>
 
     <script>
-      // 🎯 修正：精準註冊【僅有 MODEL-5 會被附加上 1PT 剛硬外框線】的組件
+      // 僅限 MODEL-5 附加 1PT 剛硬外框線組件
       AFRAME.registerComponent('architectural-outline', {
         init: function () {
           this.el.addEventListener('model-loaded', () => {
@@ -289,7 +289,7 @@
 
       <a-entity mindar-image-target="targetIndex: 0">
         <a-entity id="gestureContainer" rotation="0 0 0" scale="0.5 0.5 0.5">
-            <a-entity id="modelGroup" rotation="90 0 0">
+            <a-entity id="modelGroup" rotation="0 0 0">
                 
                 <a-gltf-model id="facadeUnits2" src="#buildingModel5" architectural-outline animation-mixer shadow="cast: true; receive: true" 
                               position="0 -0.4 0" rotation="0 0 0" scale="0.01 0.01 0.01"
@@ -299,11 +299,12 @@
                 <a-entity id="rhinoGrid" 
                           geometry="primitive: plane; width: 8; height: 8;"
                           material="color: #ffffff; opacity: 0.60; transparent: true; wireframe: true; wireframeLinewidth: 1.5; shader: flat;"
-                          position="0 0 -0.005"
+                          position="0 0 0"
+                          rotation="-90 0 0"
                           shadow="receive: true">
                 </a-entity>
                 
-                <a-plane id="shadowFloor" position="0 0 -0.01" rotation="0 0 0" width="8" height="8" material="color: #000000; opacity: 0.35; transparent: true; shadowOnly: true" shadow="receive: true"></a-plane>
+                <a-plane id="shadowFloor" position="0 -0.005 0" rotation="-90 0 0" width="8" height="8" material="color: #000000; opacity: 0.35; transparent: true; shadowOnly: true" shadow="receive: true"></a-plane>
 
             </a-entity>
         </a-entity>
@@ -385,7 +386,7 @@
           sliderMonth.addEventListener('input', updateSunAnalemma); sliderDay.addEventListener('input', updateSunAnalemma); sliderHour.addEventListener('input', updateSunAnalemma);
           updateSunAnalemma();
 
-          // 圖層選單點擊觸發
+          // 圖層選單開關
           layerToggleBtn.addEventListener('click', (e) => {
               e.stopPropagation();
               const isHidden = layerPopoverMenu.style.display === 'none' || layerPopoverMenu.style.display === '';
@@ -414,7 +415,7 @@
               }
           });
 
-          // 太陽控制開關
+          // 太陽面板開關
           toggleBtn.addEventListener('click', (e) => {
               e.stopPropagation();
               if (controlPanel.style.display === 'none' || controlPanel.style.display === '') {
@@ -433,7 +434,7 @@
               if (e.target === lightbox) { lightbox.style.opacity = '0'; setTimeout(() => { lightbox.style.display = 'none'; }, 300); }
           });
 
-          // 照片集左右觸控滑動
+          // 照片集左右滑動
           lightbox.addEventListener('touchstart', (e) => { if (e.touches.length === 1) touchStartX = e.touches[0].screenX; });
           lightbox.addEventListener('touchend', (e) => { if (e.changedTouches.length === 1) { touchEndX = e.changedTouches[0].screenX; handleSwipeGesture(); } });
           function handleSwipeGesture() {
@@ -489,7 +490,8 @@
               if(controlPanel) { controlPanel.style.display = 'none'; toggleBtn.style.background = 'rgba(255, 255, 255, 0.25)'; }
               layerPopoverMenu.style.display = 'none';
               lightbox.style.display = 'none'; lightbox.style.opacity = '0'; 
-              if(overlay) { statusText.classList.remove('emergency'); overlay.classList.remove('hidden'); statusText.innerText = "EMERGENCY ENGINE"; statusText.classList.add('emergency'); }
+              // 🎯 修正：文字更改為 EMERGENCE ENGINE
+              if(overlay) { statusText.classList.remove('emergency'); overlay.classList.remove('hidden'); statusText.innerText = "EMERGENCE ENGINE"; statusText.classList.add('emergency'); }
               if(facadeUnits2) facadeUnits2.setAttribute('position', '0 -0.4 0');
           });
 
